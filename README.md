@@ -7,7 +7,7 @@ The class uses listeners so everything is really easy! Enjoy :)
 
 Add to your gradle dependencies:
 
-	compile 'me.aflak.libraries:bluetooth:1.2'
+	compile 'me.aflak.libraries:bluetooth:1.2.4'
 
 ## In your Activity
 

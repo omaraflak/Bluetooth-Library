@@ -237,9 +237,11 @@ public class Bluetooth {
                 final int prevState	= intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
 
                 if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING) {
+                    context.unregisterReceiver(mPairReceiver);
                     if(discoveryCallback!=null)
                         discoveryCallback.onPair(devicePair);
                 } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED){
+                    context.unregisterReceiver(mPairReceiver);
                     if(discoveryCallback!=null)
                         discoveryCallback.onUnpair(devicePair);
                 }

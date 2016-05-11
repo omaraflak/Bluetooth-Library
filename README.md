@@ -11,7 +11,7 @@ Add to your gradle dependencies:
 
 ## In your Activity
 
-	Bluetooth bluetooth = new Bluetooth();
+	Bluetooth bluetooth = new Bluetooth(this);
 	bluetooth.enableBluetooth();
 	
 ## Listener to scan and pair

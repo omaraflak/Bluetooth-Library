@@ -99,12 +99,14 @@ public class Bluetooth {
 
     private class ReceiveThread extends Thread implements Runnable{
         public void run(){
-            String msg;
+            StringBuilder msg = new StringBuilder();
             try {
-                while ((msg = input.readLine()) != null) {
-                    if (communicationCallback != null)
-                        communicationCallback.onMessage(msg);
+                int c;
+                while ((c = input.read()) != -1) {
+                    msg.append(c);
                 }
+                if (communicationCallback != null)
+                    communicationCallback.onMessage(msg.toString());
             } catch (IOException e) {
                 connected=false;
                 if (communicationCallback != null)

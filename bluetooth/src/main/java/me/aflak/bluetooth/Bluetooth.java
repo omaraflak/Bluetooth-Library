@@ -35,9 +35,18 @@ public class Bluetooth {
 
     private Activity activity;
 
+    private boolean crossThread;
+
     public Bluetooth(Activity activity){
         this.activity=activity;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        crossThread = false;
+    }
+
+    public Bluetooth(Activity activity, boolean isCrossThread){
+        this.activity=activity;
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        crossThread = isCrossThread;
     }
 
     public void enableBluetooth(){
@@ -54,6 +63,10 @@ public class Bluetooth {
                 bluetoothAdapter.disable();
             }
         }
+    }
+
+    public void setCrossThread(boolean value){
+        crossThread = value;
     }
 
     public void connectToAddress(String address) {
@@ -99,14 +112,27 @@ public class Bluetooth {
 
     private class ReceiveThread extends Thread implements Runnable{
         public void run(){
-            StringBuilder msg = new StringBuilder();
+            StringBuilder msgBuilder = new StringBuilder();
             try {
                 int c;
                 while ((c = input.read()) != -1) {
-                    msg.append(c);
+                    msgBuilder.append(c);
                 }
+                final String msg = msgBuilder.toString();
                 if (communicationCallback != null)
-                    communicationCallback.onMessage(msg.toString());
+                    if(crossThread){
+                        new Runnable(){
+
+                            @Override
+                            public void run() {
+                                communicationCallback.onMessage(msg.toString());
+                            }
+                        };
+                    }
+                    else {
+                        communicationCallback.onMessage(msg.toString());
+                    }
+
             } catch (IOException e) {
                 connected=false;
                 if (communicationCallback != null)

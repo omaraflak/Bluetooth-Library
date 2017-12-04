@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +31,7 @@ public class Communication extends AppCompatActivity implements Bluetooth.Commun
     private Button btnSend;
     private EditText etTextToSend;
     private TextView tvLog;
+    private ScrollView scroll;
 
     private Bluetooth bluetooth;
 
@@ -45,6 +47,7 @@ public class Communication extends AppCompatActivity implements Bluetooth.Commun
         btnSend = (Button) findViewById(R.id.btnSend);
         etTextToSend = (EditText) findViewById(R.id.etTextToSend);
         tvLog = (TextView) findViewById(R.id.tvLog);
+        scroll = (ScrollView) findViewById(R.id.scroll);
 
         btnSend.setOnClickListener(this);
 
@@ -114,6 +117,8 @@ public class Communication extends AppCompatActivity implements Bluetooth.Commun
         }
 
         tvLog.setText(tvLog.getText().toString() + "\nReceived string: \"" + message + "\"");
+
+        scroll.fullScroll(View.FOCUS_DOWN);
     }
 
     @Override

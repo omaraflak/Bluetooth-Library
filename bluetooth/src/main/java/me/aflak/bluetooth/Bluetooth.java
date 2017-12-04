@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
-import android.util.TypedValue;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -42,7 +41,6 @@ public class Bluetooth {
     private Activity activity;
 
     private boolean crossThread;
-    private InputDataType dataType;
 
     public Bluetooth(Activity activity){
         this.activity=activity;
@@ -74,10 +72,6 @@ public class Bluetooth {
 
     public void setCrossThread(boolean value){
         crossThread = value;
-    }
-
-    public void setDataType(InputDataType type){
-        dataType = type;
     }
 
     public void connectToAddress(String address) {
@@ -130,25 +124,12 @@ public class Bluetooth {
 
     private class ReceiveThread extends Thread implements Runnable{
         public void run(){
+            String msg;
             try {
-                switch(dataType){
-                    case TEXT:
-                        String msg;
-                        while ((msg = input.readLine()) != null) {
-                            if (communicationCallback != null)
-                                dispatchOnMessage(msg);
-                        }
-                        break;
-
-                    case NUMBER:
-                        long value;
-                        while ((value = input.read()) != -1) {
-                            if (communicationCallback != null)
-                                dispatchOnMessage(value);
-                        }
+                while ((msg = input.readLine()) != null) {
+                    if (communicationCallback != null)
+                        dispatchOnMessage(msg);
                 }
-
-
 
             } catch (IOException e) {
                 connected=false;
@@ -289,11 +270,11 @@ public class Bluetooth {
                 if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING) {
                     context.unregisterReceiver(mPairReceiver);
                     if(discoveryCallback!=null)
-                        dispatchOnPair(devicePair);
+                        discoveryCallback.onPair(devicePair);
                 } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED){
                     context.unregisterReceiver(mPairReceiver);
                     if(discoveryCallback!=null)
-                        dispatchOnUnpair(devicePair);
+                        discoveryCallback.onUnpair(devicePair);
                 }
             }
         }
@@ -303,7 +284,6 @@ public class Bluetooth {
         void onConnect(BluetoothDevice device);
         void onDisconnect(BluetoothDevice device, String message);
         void onMessage(String message);
-        void onMessage(long value);
         void onError(String message);
         void onConnectError(BluetoothDevice device, String message);
     }
@@ -350,21 +330,6 @@ public class Bluetooth {
         }
         else{
             communicationCallback.onMessage(message);
-        }
-    }
-
-    private void dispatchOnMessage(final long value){
-        if(crossThread) {
-            activity.runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    communicationCallback.onMessage(value);
-                }
-            });
-        }
-        else{
-            communicationCallback.onMessage(value);
         }
     }
 
@@ -496,8 +461,6 @@ public class Bluetooth {
     public void removeDiscoveryCallback(){
         this.discoveryCallback=null;
     }
-
-    public enum InputDataType { TEXT, NUMBER }
 
 }
 

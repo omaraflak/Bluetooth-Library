@@ -24,7 +24,6 @@ import java.util.UUID;
  */
 public class Bluetooth {
     private static final int REQUEST_ENABLE_BT = 1111;
-    private static final int REQUEST_DISCOVERABLE = 1112;
 
     private Activity activity;
     private UUID uuid;
@@ -90,6 +89,11 @@ public class Bluetooth {
         }
     }
 
+    public boolean isEnabled(){
+        return bluetoothAdapter.isEnabled();
+    }
+
+
     public void onActivityResult(int requestCode, final int resultCode){
         if(bluetoothCallback!=null){
             if(requestCode==REQUEST_ENABLE_BT){
@@ -142,10 +146,6 @@ public class Bluetooth {
         return connected;
     }
 
-    public boolean isEnabled(){
-        return bluetoothAdapter.isEnabled();
-    }
-
     public void send(String msg){
         try {
             out.write(msg.getBytes());
@@ -161,6 +161,63 @@ public class Bluetooth {
             }
         }
     }
+
+    public List<BluetoothDevice> getPairedDevices(){
+        List<BluetoothDevice> devices = new ArrayList<>();
+        devices.addAll(bluetoothAdapter.getBondedDevices());
+        return devices;
+    }
+
+    public void startScanning(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+        activity.registerReceiver(scanReceiver, filter);
+        bluetoothAdapter.startDiscovery();
+    }
+
+    public void stopScanning(){
+        bluetoothAdapter.cancelDiscovery();
+    }
+
+    public void pair(BluetoothDevice device){
+        activity.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+        devicePair=device;
+        try {
+            Method method = device.getClass().getMethod("createBond", (Class[]) null);
+            method.invoke(device, (Object[]) null);
+        } catch (final Exception e) {
+            if(discoveryCallback!=null) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        discoveryCallback.onError(e.getMessage());
+                    }
+                });
+            }
+        }
+    }
+
+    public void unpair(BluetoothDevice device) {
+        activity.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+        devicePair=device;
+        try {
+            Method method = device.getClass().getMethod("removeBond", (Class[]) null);
+            method.invoke(device, (Object[]) null);
+        } catch (final Exception e) {
+            if(discoveryCallback!=null) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        discoveryCallback.onError(e.getMessage());
+                    }
+                });
+            }
+        }
+    }
+
 
     private class ReceiveThread extends Thread implements Runnable{
         public void run(){
@@ -245,49 +302,6 @@ public class Bluetooth {
                     }
                 }
             }
-        }
-    }
-
-    public List<BluetoothDevice> getPairedDevices(){
-        List<BluetoothDevice> devices = new ArrayList<>();
-        devices.addAll(bluetoothAdapter.getBondedDevices());
-        return devices;
-    }
-
-    public void scanDevices(){
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_FOUND);
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
-        activity.registerReceiver(scanReceiver, filter);
-        bluetoothAdapter.startDiscovery();
-    }
-
-    public void stopScanning(){
-        bluetoothAdapter.cancelDiscovery();
-    }
-
-    public void pair(BluetoothDevice device){
-        activity.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-        devicePair=device;
-        try {
-            Method method = device.getClass().getMethod("createBond", (Class[]) null);
-            method.invoke(device, (Object[]) null);
-        } catch (Exception e) {
-            if(discoveryCallback!=null)
-                discoveryCallback.onError(e.getMessage());
-        }
-    }
-
-    public void unpair(BluetoothDevice device) {
-        devicePair=device;
-        try {
-            Method method = device.getClass().getMethod("removeBond", (Class[]) null);
-            method.invoke(device, (Object[]) null);
-        } catch (Exception e) {
-            if(discoveryCallback!=null)
-                discoveryCallback.onError(e.getMessage());
         }
     }
 

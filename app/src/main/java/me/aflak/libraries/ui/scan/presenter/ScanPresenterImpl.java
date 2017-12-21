@@ -1,6 +1,5 @@
 package me.aflak.libraries.ui.scan.presenter;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 
 import me.aflak.bluetooth.BluetoothCallback;
@@ -16,6 +15,7 @@ import me.aflak.libraries.ui.scan.view.ScanView;
 public class ScanPresenterImpl implements ScanPresenter{
     private ScanView view;
     private ScanInteractor interactor;
+    private boolean canceledDiscovery = false;
 
     public ScanPresenterImpl(ScanView view, ScanInteractor interactor) {
         this.view = view;
@@ -46,10 +46,13 @@ public class ScanPresenterImpl implements ScanPresenter{
         view.enableScanButton(false);
         view.setScanStatus(R.string.bluetooth_scanning);
         interactor.scanDevices(discoveryCallback);
+        canceledDiscovery = false;
     }
 
     @Override
     public void scanItemClick(int position) {
+        canceledDiscovery = true;
+        interactor.stopScanning();
         interactor.pair(position);
         view.setScanStatus(R.string.bluetooth_pairing);
         view.showProgress(true);
@@ -64,9 +67,11 @@ public class ScanPresenterImpl implements ScanPresenter{
     private DiscoveryCallback discoveryCallback = new DiscoveryCallback() {
         @Override
         public void onFinish() {
-            view.setScanStatus(R.string.bluetooth_scan_finished);
-            view.showProgress(false);
-            view.enableScanButton(true);
+            if(!canceledDiscovery){
+                view.setScanStatus(R.string.bluetooth_scan_finished);
+                view.showProgress(false);
+                view.enableScanButton(true);
+            }
         }
 
         @Override

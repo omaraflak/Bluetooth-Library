@@ -3,6 +3,7 @@ package me.aflak.libraries.ui.chat.interactor;
 import android.bluetooth.BluetoothDevice;
 
 import me.aflak.bluetooth.Bluetooth;
+import me.aflak.bluetooth.BluetoothCallback;
 import me.aflak.bluetooth.CommunicationCallback;
 
 /**
@@ -14,7 +15,16 @@ public class ChatInteractorImpl implements ChatInteractor {
 
     public ChatInteractorImpl(Bluetooth bluetooth) {
         this.bluetooth = bluetooth;
-        this.bluetooth.initialize();
+    }
+
+    @Override
+    public boolean isBluetoothEnabled() {
+        return bluetooth.isEnabled();
+    }
+
+    @Override
+    public void enableBluetooth() {
+        bluetooth.enable();
     }
 
     @Override
@@ -26,5 +36,16 @@ public class ChatInteractorImpl implements ChatInteractor {
     @Override
     public void sendMessage(String message) {
         bluetooth.send(message);
+    }
+
+    @Override
+    public void onStart(BluetoothCallback bluetoothCallback) {
+        bluetooth.onStart();
+        bluetooth.setBluetoothCallback(bluetoothCallback);
+    }
+
+    @Override
+    public void onStop() {
+        bluetooth.onStop();
     }
 }

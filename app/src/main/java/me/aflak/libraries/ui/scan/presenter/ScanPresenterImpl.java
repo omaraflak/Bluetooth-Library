@@ -3,6 +3,7 @@ package me.aflak.libraries.ui.scan.presenter;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 
+import me.aflak.bluetooth.BluetoothCallback;
 import me.aflak.bluetooth.DiscoveryCallback;
 import me.aflak.libraries.R;
 import me.aflak.libraries.ui.scan.interactor.ScanInteractor;
@@ -22,18 +23,29 @@ public class ScanPresenterImpl implements ScanPresenter{
     }
 
     @Override
-    public void onCreate(final Activity activity) {
-        startScanning();
-        view.showPairedList(interactor.getPairedDevices());
+    public void onStart() {
+        interactor.onStart(bluetoothCallback);
+        if(interactor.isBluetoothEnabled()){
+            startScanning();
+            view.showPairedList(interactor.getPairedDevices());
+        }
+        else{
+            interactor.enableBluetooth();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        interactor.onStop();
     }
 
     @Override
     public void startScanning() {
-        interactor.scanDevices(discoveryCallback);
         view.clearScanList();
         view.showProgress(true);
         view.enableScanButton(false);
         view.setScanStatus(R.string.bluetooth_scanning);
+        interactor.scanDevices(discoveryCallback);
     }
 
     @Override
@@ -74,6 +86,33 @@ public class ScanPresenterImpl implements ScanPresenter{
         @Override
         public void onError(String message) {
             view.setScanStatus(message);
+        }
+    };
+
+    private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
+        @Override
+        public void onBluetoothTurningOn() {
+            view.setScanStatus(R.string.bluetooth_turning_on);
+        }
+
+        @Override
+        public void onBluetoothOn() {
+            startScanning();
+            view.showPairedList(interactor.getPairedDevices());
+        }
+
+        @Override
+        public void onBluetoothTurningOff() {
+            interactor.stopScanning();
+            view.showToast("You need to enable your bluetooth...");
+        }
+
+        @Override
+        public void onBluetoothOff() {
+        }
+
+        @Override
+        public void onUserDeniedActivation() {
         }
     };
 }

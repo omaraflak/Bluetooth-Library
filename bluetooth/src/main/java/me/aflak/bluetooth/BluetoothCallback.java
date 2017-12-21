@@ -9,7 +9,5 @@ public interface BluetoothCallback {
     void onBluetoothOn();
     void onBluetoothTurningOff();
     void onBluetoothOff();
-    void onUserDeniedBtActivation();
-    void onDeviceDiscoverable();
-    void onUserDeniedDiscoverability();
+    void onUserDeniedActivation();
 }

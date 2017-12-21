@@ -9,4 +9,6 @@ import android.content.Intent;
 public interface ChatPresenter {
     void onCreate(Intent intent);
     void onHelloWorld();
+    void onStart();
+    void onStop();
 }

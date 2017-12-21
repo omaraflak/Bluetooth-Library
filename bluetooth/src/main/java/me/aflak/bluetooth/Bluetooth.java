@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class Bluetooth {
         this.connected = false;
     }
 
-    public void initialize(){
+    public void onStart(){
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         activity.registerReceiver(bluetoothReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
@@ -71,12 +72,6 @@ public class Bluetooth {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-    }
-
-    public void showDiscoverableDialog(){
-        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 120);
-        activity.startActivityForResult(discoverableIntent, REQUEST_DISCOVERABLE);
     }
 
     public void enable(){
@@ -101,24 +96,8 @@ public class Bluetooth {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(resultCode==Activity.RESULT_OK){
-                            bluetoothCallback.onBluetoothOn();
-                        }
-                        else if(resultCode==Activity.RESULT_CANCELED){
-                            bluetoothCallback.onUserDeniedBtActivation();
-                        }
-                    }
-                });
-            }
-            else if(requestCode==REQUEST_DISCOVERABLE){
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(resultCode==Activity.RESULT_OK){
-                            bluetoothCallback.onDeviceDiscoverable();
-                        }
-                        else if(resultCode==Activity.RESULT_CANCELED){
-                            bluetoothCallback.onDeviceDiscoverable();
+                        if(resultCode==Activity.RESULT_CANCELED){
+                            bluetoothCallback.onUserDeniedActivation();
                         }
                     }
                 });
@@ -361,6 +340,8 @@ public class Bluetooth {
     private final BroadcastReceiver pairReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+
+            Log.d("BLE", "PAIR RECEIVER");
 
             if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
                 final int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);

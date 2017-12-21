@@ -60,8 +60,6 @@ public class ScanActivity extends AppCompatActivity implements ScanView {
         scanListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
         deviceList.setAdapter(scanListAdapter);
         deviceList.setOnItemClickListener(onScanListItemClick);
-
-        presenter.onCreate(this);
     }
 
     private AdapterView.OnItemClickListener onPairedListItemClick = new AdapterView.OnItemClickListener() {
@@ -132,5 +130,17 @@ public class ScanActivity extends AppCompatActivity implements ScanView {
         intent.putExtra(extraName, extraDevice);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        presenter.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        presenter.onStop();
     }
 }

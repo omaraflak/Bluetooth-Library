@@ -22,6 +22,7 @@ import me.aflak.libraries.ui.scan.view.ScanActivity;
  */
 
 public class SplashScreen extends AppCompatActivity {
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

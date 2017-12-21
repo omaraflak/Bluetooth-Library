@@ -14,4 +14,5 @@
     <string name="bluetooth_connecting">Connecting…</string>
     <string name="bluetooth_disconnected">Device Disconnected.</string>
     <string name="bluetooth_connect_in_3sec">Could not connect. New attempt in 3sec…</string>
+    <string name="bluetooth_turning_on">Turning bluetooth on...</string>
 </resources>

@@ -1,11 +1,14 @@
 package me.aflak.libraries.ui.scan.interactor;
 
 import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import me.aflak.bluetooth.Bluetooth;
+import me.aflak.bluetooth.BluetoothCallback;
+import me.aflak.bluetooth.CommunicationCallback;
 import me.aflak.bluetooth.DiscoveryCallback;
 
 /**
@@ -19,7 +22,6 @@ public class ScanInteractorImpl implements ScanInteractor {
 
     public ScanInteractorImpl(Bluetooth bluetooth) {
         this.bluetooth = bluetooth;
-        this.bluetooth.initialize();
         this.bluetooth.setDiscoveryCallback(new DiscoveryCallback() {
             @Override
             public void onFinish() {
@@ -50,7 +52,23 @@ public class ScanInteractorImpl implements ScanInteractor {
     }
 
     @Override
-    public void enable() {
+    public void onStart(BluetoothCallback bluetoothCallback) {
+        this.bluetooth.onStart();
+        this.bluetooth.setBluetoothCallback(bluetoothCallback);
+    }
+
+    @Override
+    public void onStop() {
+        this.bluetooth.onStop();
+    }
+
+    @Override
+    public boolean isBluetoothEnabled() {
+        return bluetooth.isEnabled();
+    }
+
+    @Override
+    public void enableBluetooth() {
         bluetooth.enable();
     }
 

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 
 import java.util.List;
 
+import me.aflak.bluetooth.BluetoothCallback;
 import me.aflak.bluetooth.DiscoveryCallback;
 
 /**
@@ -14,7 +15,10 @@ public interface ScanInteractor {
     List<String> getPairedDevices();
     BluetoothDevice getPairedDevice(int position);
     void scanDevices(DiscoveryCallback callback);
-    void enable();
+    boolean isBluetoothEnabled();
+    void enableBluetooth();
     void stopScanning();
     void pair(int position);
+    void onStart(BluetoothCallback bluetoothCallback);
+    void onStop();
 }

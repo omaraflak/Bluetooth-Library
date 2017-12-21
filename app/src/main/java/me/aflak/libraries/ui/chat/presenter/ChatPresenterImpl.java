@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Handler;
 
 
+import me.aflak.bluetooth.BluetoothCallback;
 import me.aflak.bluetooth.CommunicationCallback;
 import me.aflak.libraries.R;
 import me.aflak.libraries.ui.chat.interactor.ChatInteractor;
@@ -17,6 +18,7 @@ import me.aflak.libraries.ui.chat.view.ChatView;
 public class ChatPresenterImpl implements ChatPresenter {
     private ChatView view;
     private ChatInteractor interactor;
+    private BluetoothDevice device;
 
     public ChatPresenterImpl(ChatView view, ChatInteractor interactor) {
         this.view = view;
@@ -26,9 +28,7 @@ public class ChatPresenterImpl implements ChatPresenter {
     @Override
     public void onCreate(Intent intent) {
         if(intent.getExtras()!=null) {
-            BluetoothDevice device = intent.getExtras().getParcelable("device");
-            interactor.connectToDevice(device, communicationCallback);
-            view.setStatus(R.string.bluetooth_connecting);
+            device = intent.getExtras().getParcelable("device");
             view.enableHWButton(false);
         }
     }
@@ -73,6 +73,52 @@ public class ChatPresenterImpl implements ChatPresenter {
                     interactor.connectToDevice(device, communicationCallback);
                 }
             }, 3000);
+        }
+    };
+
+    @Override
+    public void onStart() {
+        interactor.onStart(bluetoothCallback);
+        if(interactor.isBluetoothEnabled()){
+            interactor.connectToDevice(device, communicationCallback);
+            view.setStatus(R.string.bluetooth_connecting);
+        }
+        else{
+            interactor.enableBluetooth();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        interactor.onStop();
+    }
+
+    private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
+        @Override
+        public void onBluetoothTurningOn() {
+
+        }
+
+        @Override
+        public void onBluetoothOn() {
+            interactor.connectToDevice(device, communicationCallback);
+            view.setStatus(R.string.bluetooth_connecting);
+            view.enableHWButton(false);
+        }
+
+        @Override
+        public void onBluetoothTurningOff() {
+
+        }
+
+        @Override
+        public void onBluetoothOff() {
+
+        }
+
+        @Override
+        public void onUserDeniedActivation() {
+
         }
     };
 }

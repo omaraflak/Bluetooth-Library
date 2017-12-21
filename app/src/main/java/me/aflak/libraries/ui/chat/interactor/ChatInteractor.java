@@ -2,6 +2,7 @@ package me.aflak.libraries.ui.chat.interactor;
 
 import android.bluetooth.BluetoothDevice;
 
+import me.aflak.bluetooth.BluetoothCallback;
 import me.aflak.bluetooth.CommunicationCallback;
 
 /**
@@ -9,6 +10,10 @@ import me.aflak.bluetooth.CommunicationCallback;
  */
 
 public interface ChatInteractor {
+    boolean isBluetoothEnabled();
+    void enableBluetooth();
     void connectToDevice(BluetoothDevice device, CommunicationCallback callback);
     void sendMessage(String message);
+    void onStart(BluetoothCallback bluetoothCallback);
+    void onStop();
 }

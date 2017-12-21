@@ -15,6 +15,8 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.List;
 
+import me.aflak.bluetooth.Bluetooth;
+import me.aflak.bluetooth.BluetoothCallback;
 import me.aflak.libraries.ui.scan.view.ScanActivity;
 
 /**

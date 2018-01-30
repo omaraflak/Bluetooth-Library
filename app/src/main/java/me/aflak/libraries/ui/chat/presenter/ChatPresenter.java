@@ -1,5 +1,6 @@
 package me.aflak.libraries.ui.chat.presenter;
 
+import android.app.Activity;
 import android.content.Intent;
 
 /**
@@ -9,6 +10,6 @@ import android.content.Intent;
 public interface ChatPresenter {
     void onCreate(Intent intent);
     void onHelloWorld();
-    void onStart();
+    void onStart(Activity activity);
     void onStop();
 }

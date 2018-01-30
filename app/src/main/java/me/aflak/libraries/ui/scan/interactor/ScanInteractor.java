@@ -1,5 +1,6 @@
 package me.aflak.libraries.ui.scan.interactor;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 
 import java.util.List;
@@ -19,6 +20,6 @@ public interface ScanInteractor {
     void enableBluetooth();
     void stopScanning();
     void pair(int position);
-    void onStart(BluetoothCallback bluetoothCallback);
+    void onStart(BluetoothCallback bluetoothCallback, Activity activity);
     void onStop();
 }

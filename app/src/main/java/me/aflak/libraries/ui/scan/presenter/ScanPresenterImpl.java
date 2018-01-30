@@ -1,5 +1,6 @@
 package me.aflak.libraries.ui.scan.presenter;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 
 import me.aflak.bluetooth.BluetoothCallback;
@@ -23,8 +24,8 @@ public class ScanPresenterImpl implements ScanPresenter{
     }
 
     @Override
-    public void onStart() {
-        interactor.onStart(bluetoothCallback);
+    public void onStart(Activity activity) {
+        interactor.onStart(bluetoothCallback, activity);
         if(interactor.isBluetoothEnabled()){
             startScanning();
             view.showPairedList(interactor.getPairedDevices());

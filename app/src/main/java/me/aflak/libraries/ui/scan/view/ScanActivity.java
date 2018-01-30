@@ -135,7 +135,7 @@ public class ScanActivity extends AppCompatActivity implements ScanView {
     @Override
     protected void onStart() {
         super.onStart();
-        presenter.onStart();
+        presenter.onStart(this);
     }
 
     @Override

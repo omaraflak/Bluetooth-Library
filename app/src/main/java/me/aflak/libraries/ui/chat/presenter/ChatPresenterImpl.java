@@ -1,5 +1,6 @@
 package me.aflak.libraries.ui.chat.presenter;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Handler;
@@ -77,8 +78,8 @@ public class ChatPresenterImpl implements ChatPresenter {
     };
 
     @Override
-    public void onStart() {
-        interactor.onStart(bluetoothCallback);
+    public void onStart(Activity activity) {
+        interactor.onStart(bluetoothCallback, activity);
         if(interactor.isBluetoothEnabled()){
             interactor.connectToDevice(device, communicationCallback);
             view.setStatus(R.string.bluetooth_connecting);

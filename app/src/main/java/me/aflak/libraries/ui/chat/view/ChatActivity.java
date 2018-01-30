@@ -78,7 +78,7 @@ public class ChatActivity extends AppCompatActivity implements ChatView{
     @Override
     protected void onStart() {
         super.onStart();
-        presenter.onStart();
+        presenter.onStart(this);
     }
 
     @Override

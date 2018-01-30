@@ -1,5 +1,6 @@
 package me.aflak.libraries.ui.scan.interactor;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 
 import java.util.ArrayList;
@@ -50,9 +51,10 @@ public class ScanInteractorImpl implements ScanInteractor {
     }
 
     @Override
-    public void onStart(BluetoothCallback bluetoothCallback) {
-        this.bluetooth.onStart();
+    public void onStart(BluetoothCallback bluetoothCallback, Activity activity) {
+        this.bluetooth.setCallbackOnUI(activity);
         this.bluetooth.setBluetoothCallback(bluetoothCallback);
+        this.bluetooth.onStart();
     }
 
     @Override

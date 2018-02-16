@@ -43,16 +43,14 @@ public class Bluetooth {
     private boolean runOnUi;
 
     public Bluetooth(Context context){
-        this.context = context;
-        this.uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-        this.communicationCallback = null;
-        this.discoveryCallback = null;
-        this.bluetoothCallback = null;
-        this.connected = false;
-        this.runOnUi = false;
+        initialize(context, UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
     }
 
     public Bluetooth(Context context, UUID uuid){
+        initialize(context, uuid);
+    }
+
+    private void initialize(Context context, UUID uuid){
         this.context = context;
         this.uuid = uuid;
         this.communicationCallback = null;
@@ -465,5 +463,3 @@ public class Bluetooth {
         this.bluetoothCallback = null;
     }
 }
-
-

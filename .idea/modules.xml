@@ -4,10 +4,7 @@
     <modules>
       <module fileurl="file://C:\Users\Omar\Documents\JAVA\Bluetooth-Library\Bluetooth.iml" filepath="C:\Users\Omar\Documents\JAVA\Bluetooth-Library\Bluetooth.iml" />
       <module fileurl="file://$PROJECT_DIR$/Bluetooth-Library.iml" filepath="$PROJECT_DIR$/Bluetooth-Library.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Bluetooth-Library.iml" filepath="$PROJECT_DIR$/Bluetooth-Library.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/bluetooth/bluetooth.iml" filepath="$PROJECT_DIR$/bluetooth/bluetooth.iml" />
       <module fileurl="file://$PROJECT_DIR$/bluetooth/bluetooth.iml" filepath="$PROJECT_DIR$/bluetooth/bluetooth.iml" />
     </modules>
   </component>

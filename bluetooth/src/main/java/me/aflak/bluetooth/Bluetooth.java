@@ -117,23 +117,35 @@ public class Bluetooth {
             }
         }
     }
-
-    public void connectToAddress(String address) {
+    
+    public void connectToAddress(String address, boolean insecureConnection) {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-        connectToDevice(device);
+        connectToDevice(device, insecureConnection);
     }
-
-    public void connectToName(String name) {
+    
+    public void connectToAddress(String address) {
+        connectToAddress(address, false);
+    }
+    
+    public void connectToName(String name, boolean insecureConnection) {
         for (BluetoothDevice blueDevice : bluetoothAdapter.getBondedDevices()) {
             if (blueDevice.getName().equals(name)) {
-                connectToDevice(blueDevice);
+                connectToDevice(blueDevice, insecureConnection);
                 return;
             }
         }
     }
+    
+    public void connectToName(String name) {
+        connectToName(name, false);
+    }
 
+    public void connectToDevice(BluetoothDevice device, boolean insecureConnection){
+        new ConnectThread(device, insecureConnection).start();
+    }
+    
     public void connectToDevice(BluetoothDevice device){
-        new ConnectThread(device).start();
+        connectToDevice(device, false);
     }
 
     public void disconnect() {
@@ -227,7 +239,6 @@ public class Bluetooth {
         }
     }
 
-
     private class ReceiveThread extends Thread implements Runnable{
         public void run(){
             String msg;
@@ -257,11 +268,16 @@ public class Bluetooth {
         }
     }
 
-    private class ConnectThread extends Thread {
-        ConnectThread(BluetoothDevice device) {
+    private class ConnectThread extends Thread {    
+        ConnectThread(BluetoothDevice device, boolean insecureConnection) {
             Bluetooth.this.device=device;
             try {
-                Bluetooth.this.socket = device.createRfcommSocketToServiceRecord(uuid);
+                if(insecureConnection){
+                    Bluetooth.this.socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+                }
+                else{
+                    Bluetooth.this.socket = device.createRfcommSocketToServiceRecord(uuid);
+                }
             } catch (IOException e) {
                 if(communicationCallback!=null){
                     communicationCallback.onError(e.getMessage());

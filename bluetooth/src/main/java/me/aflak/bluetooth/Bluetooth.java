@@ -118,22 +118,22 @@ public class Bluetooth {
         }
     }
 
-    public void connectToAddress(String address) {
+    public void connectToAddress(String address, Boolean insecureConnection) {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-        connectToDevice(device);
+        connectToDevice(device, insecureConnection);
     }
 
     public void connectToName(String name) {
         for (BluetoothDevice blueDevice : bluetoothAdapter.getBondedDevices()) {
             if (blueDevice.getName().equals(name)) {
-                connectToDevice(blueDevice);
+                connectToDevice(blueDevice, insecureConnection);
                 return;
             }
         }
     }
 
-    public void connectToDevice(BluetoothDevice device){
-        new ConnectThread(device).start();
+    public void connectToDevice(BluetoothDevice device, Boolean insecureConnection){
+        new ConnectThread(device, insecureConnection).start();
     }
 
     public void disconnect() {
@@ -258,10 +258,15 @@ public class Bluetooth {
     }
 
     private class ConnectThread extends Thread {
-        ConnectThread(BluetoothDevice device) {
+        ConnectThread(BluetoothDevice device, Boolean insecureConnection) {
             Bluetooth.this.device=device;
             try {
-                Bluetooth.this.socket = device.createRfcommSocketToServiceRecord(uuid);
+                if(insecureConnection){
+                    Bluetooth.this.socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+                }
+                else{
+                    Bluetooth.this.socket = device.createRfcommSocketToServiceRecord(uuid);
+                }
             } catch (IOException e) {
                 if(communicationCallback!=null){
                     communicationCallback.onError(e.getMessage());

@@ -12,14 +12,14 @@ The class uses listeners so everything should be really easy! Enjoy :)
 
 Add to your gradle dependencies:
 
-```gradle
-compile 'me.aflak.libraries:bluetooth:1.3.2'
+```
+implementation 'me.aflak.libraries:bluetooth:1.3.2'
 ```
 
-## In your Activity
+## Init with a Context
 
 ```java
-Bluetooth bluetooth = new Bluetooth(this);
+Bluetooth bluetooth = new Bluetooth(context);
 if(!bluetooth.isEnabled())
     bluetooth.enable();
 //

@@ -92,6 +92,10 @@ public class Bluetooth {
         }
     }
 
+    public BluetoothSocket getSocket(){
+        return socket;
+    }
+
     public boolean isEnabled(){
         return bluetoothAdapter.isEnabled();
     }
@@ -192,6 +196,7 @@ public class Bluetooth {
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
 
         context.registerReceiver(scanReceiver, filter);
         bluetoothAdapter.startDiscovery();
@@ -347,13 +352,23 @@ public class Bluetooth {
                             }
                         }
                         break;
+                    case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
+                        if (discoveryCallback != null){
+                            ThreadHelper.run(runOnUi, activity, new Runnable() {
+                                @Override
+                                public void run() {
+                                    discoveryCallback.onDiscoveryStarted();
+                                }
+                            });
+                        }
+                        break;
                     case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
                         context.unregisterReceiver(scanReceiver);
                         if (discoveryCallback != null){
                             ThreadHelper.run(runOnUi, activity, new Runnable() {
                                 @Override
                                 public void run() {
-                                    discoveryCallback.onFinish();
+                                    discoveryCallback.onDiscoveryFinished();
                                 }
                             });
                         }
@@ -364,7 +379,7 @@ public class Bluetooth {
                             ThreadHelper.run(runOnUi, activity, new Runnable() {
                                 @Override
                                 public void run() {
-                                    discoveryCallback.onDevice(device);
+                                    discoveryCallback.onDeviceFound(device);
                                 }
                             });
                         }
@@ -390,7 +405,7 @@ public class Bluetooth {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
-                                discoveryCallback.onPair(devicePair);
+                                discoveryCallback.onDevicePaired(devicePair);
                             }
                         });
                     }
@@ -400,7 +415,7 @@ public class Bluetooth {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
-                                discoveryCallback.onUnpair(devicePair);
+                                discoveryCallback.onDeviceUnpaired(devicePair);
                             }
                         });
                     }
@@ -432,7 +447,8 @@ public class Bluetooth {
                                 case BluetoothAdapter.STATE_TURNING_ON:
                                     bluetoothCallback.onBluetoothTurningOn();
                                     break;
-                            }                        }
+                            }
+                        }
                     });
                 }
             }

@@ -35,7 +35,7 @@ public class Bluetooth {
     private BufferedReader input;
     private OutputStream out;
 
-    private CommunicationCallback communicationCallback;
+    private DeviceCallback deviceCallback;
     private DiscoveryCallback discoveryCallback;
     private BluetoothCallback bluetoothCallback;
     private boolean connected;
@@ -53,7 +53,7 @@ public class Bluetooth {
     private void initialize(Context context, UUID uuid){
         this.context = context;
         this.uuid = uuid;
-        this.communicationCallback = null;
+        this.deviceCallback = null;
         this.discoveryCallback = null;
         this.bluetoothCallback = null;
         this.connected = false;
@@ -154,11 +154,11 @@ public class Bluetooth {
         try {
             socket.close();
         } catch (final IOException e) {
-            if(communicationCallback!=null) {
+            if(deviceCallback !=null) {
                 ThreadHelper.run(runOnUi, activity, new Runnable() {
                     @Override
                     public void run() {
-                        communicationCallback.onError(e.getMessage());
+                        deviceCallback.onError(e.getMessage());
                     }
                 });
             }
@@ -174,11 +174,11 @@ public class Bluetooth {
             out.write(msg.getBytes());
         } catch (final IOException e) {
             connected=false;
-            if(communicationCallback!=null){
+            if(deviceCallback !=null){
                 ThreadHelper.run(runOnUi, activity, new Runnable() {
                     @Override
                     public void run() {
-                        communicationCallback.onDisconnect(device, e.getMessage());
+                        deviceCallback.onDeviceDisconnected(device, e.getMessage());
                     }
                 });
             }
@@ -247,23 +247,23 @@ public class Bluetooth {
             String msg;
             try {
                 while((msg = input.readLine()) != null) {
-                    if(communicationCallback != null){
+                    if(deviceCallback != null){
                         final String msgCopy = msg;
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
-                                communicationCallback.onMessage(msgCopy);
+                                deviceCallback.onMessage(msgCopy);
                             }
                         });
                     }
                 }
             } catch (final IOException e) {
                 connected=false;
-                if(communicationCallback != null){
+                if(deviceCallback != null){
                     ThreadHelper.run(runOnUi, activity, new Runnable() {
                         @Override
                         public void run() {
-                            communicationCallback.onDisconnect(device, e.getMessage());
+                            deviceCallback.onDeviceDisconnected(device, e.getMessage());
                         }
                     });
                 }
@@ -282,8 +282,8 @@ public class Bluetooth {
                     Bluetooth.this.socket = device.createRfcommSocketToServiceRecord(uuid);
                 }
             } catch (IOException e) {
-                if(communicationCallback!=null){
-                    communicationCallback.onError(e.getMessage());
+                if(deviceCallback !=null){
+                    deviceCallback.onError(e.getMessage());
                 }
             }
         }
@@ -299,20 +299,20 @@ public class Bluetooth {
 
                 new ReceiveThread().start();
 
-                if(communicationCallback!=null) {
+                if(deviceCallback !=null) {
                     ThreadHelper.run(runOnUi, activity, new Runnable() {
                         @Override
                         public void run() {
-                            communicationCallback.onConnect(device);
+                            deviceCallback.onDeviceConnected(device);
                         }
                     });
                 }
             } catch (final IOException e) {
-                if(communicationCallback!=null) {
+                if(deviceCallback !=null) {
                     ThreadHelper.run(runOnUi, activity, new Runnable() {
                         @Override
                         public void run() {
-                            communicationCallback.onConnectError(device, e.getMessage());
+                            deviceCallback.onConnectError(device, e.getMessage());
                         }
                     });
                 }
@@ -320,11 +320,11 @@ public class Bluetooth {
                 try {
                     socket.close();
                 } catch (final IOException closeException) {
-                    if (communicationCallback != null) {
+                    if (deviceCallback != null) {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
-                                communicationCallback.onError(closeException.getMessage());
+                                deviceCallback.onError(closeException.getMessage());
                             }
                         });
                     }
@@ -455,12 +455,12 @@ public class Bluetooth {
         }
     };
 
-    public void setCommunicationCallback(CommunicationCallback communicationCallback) {
-        this.communicationCallback = communicationCallback;
+    public void setDeviceCallback(DeviceCallback deviceCallback) {
+        this.deviceCallback = deviceCallback;
     }
 
     public void removeCommunicationCallback(){
-        this.communicationCallback = null;
+        this.deviceCallback = null;
     }
 
     public void setDiscoveryCallback(DiscoveryCallback discoveryCallback){

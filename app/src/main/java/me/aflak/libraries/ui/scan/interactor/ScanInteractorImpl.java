@@ -23,24 +23,29 @@ public class ScanInteractorImpl implements ScanInteractor {
         this.bluetooth = bluetooth;
         this.bluetooth.setDiscoveryCallback(new DiscoveryCallback() {
             @Override
-            public void onFinish() {
-                presenterDiscoveryCallback.onFinish();
+            public void onDiscoveryStarted() {
+                presenterDiscoveryCallback.onDiscoveryStarted();
             }
 
             @Override
-            public void onDevice(BluetoothDevice device) {
-                presenterDiscoveryCallback.onDevice(device);
+            public void onDiscoveryFinished() {
+                presenterDiscoveryCallback.onDiscoveryFinished();
+            }
+
+            @Override
+            public void onDeviceFound(BluetoothDevice device) {
+                presenterDiscoveryCallback.onDeviceFound(device);
                 discoveredDevices.add(device);
             }
 
             @Override
-            public void onPair(BluetoothDevice device) {
-                presenterDiscoveryCallback.onPair(device);
+            public void onDevicePaired(BluetoothDevice device) {
+                presenterDiscoveryCallback.onDevicePaired(device);
             }
 
             @Override
-            public void onUnpair(BluetoothDevice device) {
-                presenterDiscoveryCallback.onUnpair(device);
+            public void onDeviceUnpaired(BluetoothDevice device) {
+                presenterDiscoveryCallback.onDeviceUnpaired(device);
             }
 
             @Override

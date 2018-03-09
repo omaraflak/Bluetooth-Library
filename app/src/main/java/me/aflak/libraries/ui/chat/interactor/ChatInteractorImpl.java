@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothDevice;
 
 import me.aflak.bluetooth.Bluetooth;
 import me.aflak.bluetooth.BluetoothCallback;
-import me.aflak.bluetooth.CommunicationCallback;
+import me.aflak.bluetooth.DeviceCallback;
 
 /**
  * Created by Omar on 20/12/2017.
@@ -29,8 +29,8 @@ public class ChatInteractorImpl implements ChatInteractor {
     }
 
     @Override
-    public void connectToDevice(BluetoothDevice device, CommunicationCallback callback) {
-        bluetooth.setCommunicationCallback(callback);
+    public void connectToDevice(BluetoothDevice device, DeviceCallback callback) {
+        bluetooth.setDeviceCallback(callback);
         bluetooth.connectToDevice(device);
     }
 

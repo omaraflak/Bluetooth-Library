@@ -7,7 +7,7 @@ import android.os.Handler;
 
 
 import me.aflak.bluetooth.BluetoothCallback;
-import me.aflak.bluetooth.CommunicationCallback;
+import me.aflak.bluetooth.DeviceCallback;
 import me.aflak.libraries.R;
 import me.aflak.libraries.ui.chat.interactor.ChatInteractor;
 import me.aflak.libraries.ui.chat.view.ChatView;
@@ -40,15 +40,15 @@ public class ChatPresenterImpl implements ChatPresenter {
         view.appendMessage("--> Hello World !");
     }
 
-    private CommunicationCallback communicationCallback = new CommunicationCallback() {
+    private DeviceCallback communicationCallback = new DeviceCallback() {
         @Override
-        public void onConnect(BluetoothDevice device) {
+        public void onDeviceConnected(BluetoothDevice device) {
             view.setStatus(R.string.bluetooth_connected);
             view.enableHWButton(true);
         }
 
         @Override
-        public void onDisconnect(BluetoothDevice device, String message) {
+        public void onDeviceDisconnected(BluetoothDevice device, String message) {
             view.setStatus(R.string.bluetooth_connecting);
             view.enableHWButton(false);
             interactor.connectToDevice(device, communicationCallback);

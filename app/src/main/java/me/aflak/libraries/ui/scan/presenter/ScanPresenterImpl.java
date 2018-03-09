@@ -2,6 +2,7 @@ package me.aflak.libraries.ui.scan.presenter;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 
 import me.aflak.bluetooth.BluetoothCallback;
 import me.aflak.bluetooth.DiscoveryCallback;
@@ -67,7 +68,12 @@ public class ScanPresenterImpl implements ScanPresenter{
 
     private DiscoveryCallback discoveryCallback = new DiscoveryCallback() {
         @Override
-        public void onFinish() {
+        public void onDiscoveryStarted() {
+            view.showToast("Discovery started");
+        }
+
+        @Override
+        public void onDiscoveryFinished() {
             if(!canceledDiscovery){
                 view.setScanStatus(R.string.bluetooth_scan_finished);
                 view.showProgress(false);
@@ -76,17 +82,17 @@ public class ScanPresenterImpl implements ScanPresenter{
         }
 
         @Override
-        public void onDevice(BluetoothDevice device) {
+        public void onDeviceFound(BluetoothDevice device) {
             view.addDeviceToScanList(device.getAddress()+" : "+device.getName());
         }
 
         @Override
-        public void onPair(BluetoothDevice device) {
+        public void onDevicePaired(BluetoothDevice device) {
             view.navigateToChat("device", device);
         }
 
         @Override
-        public void onUnpair(BluetoothDevice device) {
+        public void onDeviceUnpaired(BluetoothDevice device) {
         }
 
         @Override

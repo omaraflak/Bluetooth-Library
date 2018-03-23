@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -169,9 +172,13 @@ public class Bluetooth {
         return connected;
     }
 
-    public void send(String msg){
+    public void send(String msg, String charset){
         try {
-            out.write(msg.getBytes());
+            if(!TextUtils.isEmpty(charset)) {
+                out.write(msg.getBytes(charset));//Eg: "US-ASCII"
+            }else {
+                out.write(msg.getBytes());//Sending as UTF-8 as default
+            }
         } catch (final IOException e) {
             connected=false;
             if(deviceCallback !=null){

@@ -203,6 +203,7 @@ public class Bluetooth {
     }
 
     public void stopScanning(){
+        context.unregisterReceiver(scanReceiver);
         bluetoothAdapter.cancelDiscovery();
     }
 

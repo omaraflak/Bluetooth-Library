@@ -190,6 +190,10 @@ public class Bluetooth {
         }
     }
 
+    public void send(String msg){
+        send(msg, null);
+    }
+
     public List<BluetoothDevice> getPairedDevices(){
         List<BluetoothDevice> devices = new ArrayList<>();
         devices.addAll(bluetoothAdapter.getBondedDevices());

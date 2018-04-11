@@ -36,7 +36,7 @@ public class ChatInteractorImpl implements ChatInteractor {
 
     @Override
     public void sendMessage(String message) {
-        bluetooth.send(message,null); //Sending as UTF-8 by default
+        bluetooth.send(message); //Sending as UTF-8 by default
     }
 
     @Override

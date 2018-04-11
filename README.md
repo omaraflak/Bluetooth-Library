@@ -13,7 +13,7 @@ The class uses listeners so everything should be really easy! Enjoy :)
 Add to your gradle dependencies:
 
 ```
-implementation 'me.aflak.libraries:bluetooth:1.3.2'
+implementation 'me.aflak.libraries:bluetooth:1.3.3'
 ```
 
 ## Init with a Context

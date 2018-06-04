@@ -54,6 +54,7 @@ public class Bluetooth {
     private void initialize(Context context, UUID uuid){
         this.context = context;
         this.uuid = uuid;
+        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.deviceCallback = null;
         this.discoveryCallback = null;
         this.bluetoothCallback = null;
@@ -62,7 +63,6 @@ public class Bluetooth {
     }
 
     public void onStart(){
-        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         context.registerReceiver(bluetoothReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
@@ -98,7 +98,10 @@ public class Bluetooth {
     }
 
     public boolean isEnabled(){
-        return bluetoothAdapter.isEnabled();
+        if(bluetoothAdapter!=null) {
+            return bluetoothAdapter.isEnabled();
+        }
+        return false;
     }
 
     public void setCallbackOnUI(Activity activity){

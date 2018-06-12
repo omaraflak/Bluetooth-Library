@@ -15,22 +15,22 @@ The class uses listeners so everything should be really easy! Enjoy :)
 Add to your gradle dependencies:
 
 ```
-implementation 'me.aflak.libraries:bluetooth:1.3.3'
+implementation 'me.aflak.libraries:bluetooth:1.3.4'
 ```
 
 ## Init with a Context
 
 ```java
 Bluetooth bluetooth = new Bluetooth(context);
-if(!bluetooth.isEnabled())
-    bluetooth.enable();
 //
 // ...
 //
 @Override
 protected void onStart() {
     super.onStart();
+    // you must have bluetooth permissions before calling bluetooth.onStart()
     bluetooth.onStart();
+    bluetooth.enable();
 }
 
 @Override

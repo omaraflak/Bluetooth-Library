@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import me.aflak.libraries.MyApp;
 import me.aflak.libraries.data.BluetoothModule;
 import me.aflak.libraries.ui.chat.view.ChatActivity;
 import me.aflak.libraries.R;
@@ -47,7 +48,7 @@ public class ScanActivity extends AppCompatActivity implements ScanView {
         setContentView(R.layout.activity_scan);
 
         DaggerScanComponent.builder()
-            .bluetoothModule(new BluetoothModule(this))
+            .bluetoothModule(MyApp.app().bluetoothModule())
             .scanModule(new ScanModule(this))
             .build().inject(this);
 

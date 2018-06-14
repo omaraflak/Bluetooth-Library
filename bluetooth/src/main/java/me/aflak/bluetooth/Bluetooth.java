@@ -3,11 +3,13 @@ package me.aflak.bluetooth;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -30,6 +32,7 @@ public class Bluetooth {
     private Context context;
     private UUID uuid;
 
+    private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket socket;
     private BluetoothDevice device, devicePair;
@@ -62,7 +65,16 @@ public class Bluetooth {
     }
 
     public void onStart(){
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
+            bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+            if(bluetoothManager!=null) {
+                bluetoothAdapter = bluetoothManager.getAdapter();
+            }
+        }
+        else{
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        }
+
         context.registerReceiver(bluetoothReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
@@ -71,9 +83,11 @@ public class Bluetooth {
     }
 
     public void showEnableDialog(Activity activity){
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        if(bluetoothAdapter!=null) {
+            if (!bluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            }
         }
     }
 
@@ -95,6 +109,10 @@ public class Bluetooth {
 
     public BluetoothSocket getSocket(){
         return socket;
+    }
+
+    public BluetoothManager getBluetoothManager() {
+        return bluetoothManager;
     }
 
     public BluetoothAdapter getBluetoothAdapter() {
@@ -202,9 +220,7 @@ public class Bluetooth {
     }
 
     public List<BluetoothDevice> getPairedDevices(){
-        List<BluetoothDevice> devices = new ArrayList<>();
-        devices.addAll(bluetoothAdapter.getBondedDevices());
-        return devices;
+        return new ArrayList<>(bluetoothAdapter.getBondedDevices());
     }
 
     public void startScanning(){

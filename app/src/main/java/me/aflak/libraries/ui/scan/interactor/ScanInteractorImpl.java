@@ -57,9 +57,9 @@ public class ScanInteractorImpl implements ScanInteractor {
 
     @Override
     public void onStart(BluetoothCallback bluetoothCallback, Activity activity) {
+        this.bluetooth.onStart();
         this.bluetooth.setCallbackOnUI(activity);
         this.bluetooth.setBluetoothCallback(bluetoothCallback);
-        this.bluetooth.onStart();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package me.aflak.libraries.data;
 
 import android.app.Activity;
+import android.content.Context;
 
 import javax.inject.Singleton;
 
@@ -14,19 +15,19 @@ import me.aflak.bluetooth.Bluetooth;
 
 @Module
 public class BluetoothModule {
-    private Activity activity;
+    private Context context;
 
-    public BluetoothModule(Activity activity) {
-        this.activity = activity;
+    public BluetoothModule(Context context) {
+        this.context = context;
     }
 
     @Provides @Singleton
-    public Activity provideActivity(){
-        return activity;
+    public Context provideContext(){
+        return context;
     }
 
     @Provides @Singleton
-    public Bluetooth provideBluetooth(Activity activity){
-        return new Bluetooth(activity);
+    public Bluetooth provideBluetooth(){
+        return new Bluetooth(context);
     }
 }

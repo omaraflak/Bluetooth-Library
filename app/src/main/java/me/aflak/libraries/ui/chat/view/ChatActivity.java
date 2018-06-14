@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import me.aflak.libraries.MyApp;
 import me.aflak.libraries.R;
 import me.aflak.libraries.data.BluetoothModule;
 import me.aflak.libraries.ui.chat.data.ChatModule;
@@ -35,7 +36,7 @@ public class ChatActivity extends AppCompatActivity implements ChatView{
         setContentView(R.layout.activity_chat);
 
         DaggerChatComponent.builder()
-            .bluetoothModule(new BluetoothModule(this))
+            .bluetoothModule(MyApp.app().bluetoothModule())
             .chatModule(new ChatModule(this))
             .build().inject(this);
 

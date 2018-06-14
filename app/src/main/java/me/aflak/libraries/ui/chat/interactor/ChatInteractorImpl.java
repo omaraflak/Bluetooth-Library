@@ -41,9 +41,9 @@ public class ChatInteractorImpl implements ChatInteractor {
 
     @Override
     public void onStart(BluetoothCallback bluetoothCallback, Activity activity) {
+        bluetooth.onStart();
         bluetooth.setCallbackOnUI(activity);
         bluetooth.setBluetoothCallback(bluetoothCallback);
-        bluetooth.onStart();
     }
 
     @Override

@@ -21,6 +21,7 @@ implementation 'me.aflak.libraries:bluetooth:1.3.4'
 ## Init with a Context
 
 ```java
+// you must have bluetooth permissions before calling the constructor
 Bluetooth bluetooth = new Bluetooth(context);
 //
 // ...
@@ -28,7 +29,6 @@ Bluetooth bluetooth = new Bluetooth(context);
 @Override
 protected void onStart() {
     super.onStart();
-    // you must have bluetooth permissions before calling bluetooth.onStart()
     bluetooth.onStart();
     bluetooth.enable();
 }

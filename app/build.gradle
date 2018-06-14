@@ -44,4 +44,9 @@ dependencies {
 
     // dexter (permissions)
     implementation 'com.karumi:dexter:4.2.0'
+
+    // Leaks
+    testImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
 }

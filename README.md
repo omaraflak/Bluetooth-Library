@@ -8,7 +8,7 @@ This is an Android library that simplifies the process of bluetooth communicatio
 
 I used a BufferedReader to read data from the bluetooth socket. As I'm reading with readLine(), each message you're sending to the Android must end with a **\n**. Otherwise it won't be received.
 
-The class uses listeners so everything should be really easy! Enjoy :)
+***This app does not support BLE devices***
 
 # Install
 

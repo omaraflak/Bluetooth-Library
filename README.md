@@ -1,8 +1,8 @@
-# Android Bluetooth Library [ ![Download](https://api.bintray.com/packages/omaflak/maven/bluetooth/images/download.svg) ](https://bintray.com/omaflak/maven/bluetooth/_latestVersion)
+# Android Bluetooth Client Library [ ![Download](https://api.bintray.com/packages/omaflak/maven/bluetooth/images/download.svg) ](https://bintray.com/omaflak/maven/bluetooth/_latestVersion)
 
 <img src="Logotype primary.png" width="60%" height="60%" />
 
-This is an Android library that simplifies the process of bluetooth communication.
+This is an Android library that simplifies the process of bluetooth communication, **client side**.
 
 # Important
 

@@ -15,7 +15,7 @@ I used a BufferedReader to read data from the bluetooth socket. As I'm reading w
 Add to your gradle dependencies:
 
 ```
-implementation 'me.aflak.libraries:bluetooth:1.3.4'
+implementation 'me.aflak.libraries:bluetooth:1.3.5'
 ```
 
 ## Init with a Context

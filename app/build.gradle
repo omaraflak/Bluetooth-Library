@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "27.0.3"
 
     defaultConfig {
         applicationId "me.aflak.libraries"
@@ -35,8 +34,8 @@ dependencies {
     implementation project(path: ':bluetooth')
 
     // dagger2
-    implementation 'com.google.dagger:dagger:2.16'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
+    implementation 'com.google.dagger:dagger:2.20'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.20'
 
     // butter knife
     implementation 'com.jakewharton:butterknife:8.8.1'

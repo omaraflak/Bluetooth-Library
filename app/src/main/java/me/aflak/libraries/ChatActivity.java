@@ -50,6 +50,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        bluetooth.disconnect();
         bluetooth.onStop();
     }
 

@@ -110,6 +110,7 @@ public class ScanActivity extends AppCompatActivity{
         bluetooth.onStart();
         if(bluetooth.isEnabled()){
             displayPairedDevices();
+            scanButton.setEnabled(true);
         } else {
             bluetooth.showEnableDialog(ScanActivity.this);
         }

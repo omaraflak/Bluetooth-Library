@@ -1,4 +1,4 @@
-package me.aflak.libraries.ui;
+package me.aflak.libraries;
 
 import android.Manifest;
 import android.content.Intent;
@@ -14,9 +14,6 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.List;
-
-import me.aflak.libraries.ui.scan.view.ScanActivity;
-
 /**
  * Created by Omar on 20/12/2017.
  */

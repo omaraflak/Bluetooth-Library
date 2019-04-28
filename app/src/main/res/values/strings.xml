@@ -2,17 +2,6 @@
     <string name="app_name">Bluetooth Library Demo</string>
     <string name="helloWorld">Hello World !</string>
 
-    <string name="activity_scan_button">Scan again</string>
+    <string name="activity_scan_button">Scan</string>
     <string name="activity_scan_paired_text">Paired Devices :</string>
-
-    <string name="bluetooth_scanning">Scanning…</string>
-    <string name="bluetooth_scan_finished">Scan finished.</string>
-    <string name="bluetooth_pairing">Pairing…</string>
-    <string name="bluetooth_paired">Device Paired.</string>
-    <string name="bluetooth_unpaired">Device Unpaired.</string>
-    <string name="bluetooth_connected">Device Connected.</string>
-    <string name="bluetooth_connecting">Connecting…</string>
-    <string name="bluetooth_disconnected">Device Disconnected.</string>
-    <string name="bluetooth_connect_in_3sec">Could not connect. New attempt in 3sec…</string>
-    <string name="bluetooth_turning_on">Turning bluetooth on…</string>
 </resources>

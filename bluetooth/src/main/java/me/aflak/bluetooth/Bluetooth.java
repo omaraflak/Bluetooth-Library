@@ -26,8 +26,6 @@ import me.aflak.bluetooth.constants.DiscoveryError;
 import me.aflak.bluetooth.interfaces.BluetoothCallback;
 import me.aflak.bluetooth.interfaces.DeviceCallback;
 import me.aflak.bluetooth.interfaces.DiscoveryCallback;
-import me.aflak.bluetooth.utils.OnFailureListener;
-import me.aflak.bluetooth.utils.OnSuccessListener;
 import me.aflak.bluetooth.utils.ThreadHelper;
 
 /**
@@ -43,7 +41,6 @@ public class Bluetooth {
 
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothDevice deviceConnected;
 
     private DeviceCallback deviceCallback;
     private DiscoveryCallback discoveryCallback;
@@ -251,38 +248,7 @@ public class Bluetooth {
         if(bluetoothAdapter.isDiscovering()) {
             bluetoothAdapter.cancelDiscovery();
         }
-        final BluetoothSocket socket = createBluetoothSocket(device, insecureConnection);
-        if(socket != null) {
-            connectInThread(socket, new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    deviceConnected = device;
-                    connected = true;
-                    if(deviceCallback !=null) {
-                        ThreadHelper.run(runOnUi, activity, new Runnable() {
-                            @Override
-                            public void run() {
-                                deviceCallback.onDeviceConnected(device);
-                            }
-                        });
-                    }
-                    receiveThread = new ReceiveThread(socket);
-                    receiveThread.start();
-                }
-            }, new OnFailureListener<IOException>() {
-                @Override
-                public void onFailure(final IOException e) {
-                    if(deviceCallback !=null) {
-                        ThreadHelper.run(runOnUi, activity, new Runnable() {
-                            @Override
-                            public void run() {
-                                deviceCallback.onConnectError(device, e.getMessage());
-                            }
-                        });
-                    }
-                }
-            });
-        }
+        connectInThread(device, insecureConnection);
     }
 
     /**
@@ -326,7 +292,7 @@ public class Bluetooth {
      * @param charset Charset used to encode the String. Default charset is UTF-8.
      */
     public void send(String msg, String charset){
-        OutputStream out = receiveThread.getOut();
+        OutputStream out = receiveThread.getOutputStream();
         try {
             if(charset==null){
                 out.write(msg.getBytes());
@@ -339,7 +305,7 @@ public class Bluetooth {
                 ThreadHelper.run(runOnUi, activity, new Runnable() {
                     @Override
                     public void run() {
-                        deviceCallback.onDeviceDisconnected(deviceConnected, e.getMessage());
+                        deviceCallback.onDeviceDisconnected(receiveThread.getDevice(), e.getMessage());
                     }
                 });
             }
@@ -446,27 +412,49 @@ public class Bluetooth {
         return socket;
     }
 
-    private void connectInThread(final BluetoothSocket socket, final OnSuccessListener<Void> onSuccessListener, final OnFailureListener<IOException> onFailureListener){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    socket.connect();
-                    onSuccessListener.onSuccess(null);
-                } catch (final IOException e) {
-                    onFailureListener.onFailure(e);
+    private void connectInThread(final BluetoothDevice device, boolean insecureConnection){
+        final BluetoothSocket socket = createBluetoothSocket(device, insecureConnection);
+        if(socket != null) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        socket.connect();
+                        connected = true;
+                        if(deviceCallback !=null) {
+                            ThreadHelper.run(runOnUi, activity, new Runnable() {
+                                @Override
+                                public void run() {
+                                    deviceCallback.onDeviceConnected(device);
+                                }
+                            });
+                        }
+                        receiveThread = new ReceiveThread(socket, device);
+                        receiveThread.start();
+                    } catch (final IOException e) {
+                        if(deviceCallback !=null) {
+                            ThreadHelper.run(runOnUi, activity, new Runnable() {
+                                @Override
+                                public void run() {
+                                    deviceCallback.onConnectError(device, e.getMessage());
+                                }
+                            });
+                        }
+                    }
                 }
-            }
-        }).start();
+            }).start();
+        }
     }
 
     private class ReceiveThread extends Thread implements Runnable{
         private BluetoothSocket socket;
+        private BluetoothDevice device;
         private BufferedReader in;
         private OutputStream out;
 
-        public ReceiveThread(BluetoothSocket socket) {
+        public ReceiveThread(BluetoothSocket socket, BluetoothDevice device) {
             this.socket = socket;
+            this.device = device;
             try {
                 out = socket.getOutputStream();
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -495,7 +483,7 @@ public class Bluetooth {
                     ThreadHelper.run(runOnUi, activity, new Runnable() {
                         @Override
                         public void run() {
-                            deviceCallback.onDeviceDisconnected(deviceConnected, e.getMessage());
+                            deviceCallback.onDeviceDisconnected(device, e.getMessage());
                         }
                     });
                 }
@@ -506,11 +494,11 @@ public class Bluetooth {
             return socket;
         }
 
-        public BufferedReader getIn() {
-            return in;
+        public BluetoothDevice getDevice() {
+            return device;
         }
 
-        public OutputStream getOut() {
+        public OutputStream getOutputStream() {
             return out;
         }
     }

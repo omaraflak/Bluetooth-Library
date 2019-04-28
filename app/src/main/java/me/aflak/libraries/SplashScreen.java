@@ -40,7 +40,7 @@ public class SplashScreen extends AppCompatActivity {
                         finish();
                     }
                     else{
-                        Toast.makeText(SplashScreen.this, "We need these permissions...", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SplashScreen.this, "I need these permissions...", Toast.LENGTH_SHORT).show();
                         askPermissions();
                     }
                 }

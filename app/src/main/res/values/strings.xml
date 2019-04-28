@@ -1,7 +1,4 @@
 <resources>
     <string name="app_name">Bluetooth Library Demo</string>
     <string name="helloWorld">Hello World !</string>
-
-    <string name="activity_scan_button">Scan</string>
-    <string name="activity_scan_paired_text">Paired Devices :</string>
 </resources>

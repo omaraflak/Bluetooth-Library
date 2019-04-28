@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -26,7 +25,8 @@ import java.util.UUID;
  * Created by Omar on 14/07/2015.
  */
 public class Bluetooth {
-    private static final int REQUEST_ENABLE_BT = 1111;
+    private final static String DEFAULT_UUID = "00001101-0000-1000-8000-00805f9b34fb";
+    private final static int REQUEST_ENABLE_BT = 1111;
 
     private Activity activity;
     private Context context;
@@ -46,10 +46,19 @@ public class Bluetooth {
 
     private boolean runOnUi;
 
+    /**
+     * Init Bluetooth object. Default UUID will be used.
+     * @param context Context to be used.
+     */
     public Bluetooth(Context context){
-        initialize(context, UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
+        initialize(context, UUID.fromString(DEFAULT_UUID));
     }
 
+    /**
+     * Init Bluetooth object.
+     * @param context Context to be used.
+     * @param uuid Socket UUID to be used.
+     */
     public Bluetooth(Context context, UUID uuid){
         initialize(context, uuid);
     }
@@ -64,6 +73,9 @@ public class Bluetooth {
         this.runOnUi = false;
     }
 
+    /**
+     * Start bluetooth service.
+     */
     public void onStart(){
         if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
             bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -78,10 +90,17 @@ public class Bluetooth {
         context.registerReceiver(bluetoothReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
+    /**
+     * Stop bluetooth service.
+     */
     public void onStop(){
         context.unregisterReceiver(bluetoothReceiver);
     }
 
+    /**
+     * Prompt user to enable bluetooth. onActivityResult() must be called to catch response.
+     * @param activity Activity used to display the dialog.
+     */
     public void showEnableDialog(Activity activity){
         if(bluetoothAdapter!=null) {
             if (!bluetoothAdapter.isEnabled()) {
@@ -91,6 +110,9 @@ public class Bluetooth {
         }
     }
 
+    /**
+     * Enable bluetooth without asking the user.
+     */
     public void enable(){
         if(bluetoothAdapter!=null) {
             if (!bluetoothAdapter.isEnabled()) {
@@ -99,6 +121,9 @@ public class Bluetooth {
         }
     }
 
+    /**
+     * Disable bluetooth without asking the user.
+     */
     public void disable(){
         if(bluetoothAdapter!=null) {
             if (bluetoothAdapter.isEnabled()) {
@@ -107,18 +132,34 @@ public class Bluetooth {
         }
     }
 
+    /**
+     * Get BluetoothSocket used for connection.
+     * @return BluetoothSocket.
+     */
     public BluetoothSocket getSocket(){
         return socket;
     }
 
+    /**
+     * Get BluetoothManager.
+     * @return BluetoothManager.
+     */
     public BluetoothManager getBluetoothManager() {
         return bluetoothManager;
     }
 
+    /**
+     * Get BluetoothAdapter.
+     * @return BluetoothAdapter.
+     */
     public BluetoothAdapter getBluetoothAdapter() {
         return bluetoothAdapter;
     }
 
+    /**
+     * Check if bluetooth is enabled.
+     * @return true if bluetooth is enabled, false otherwise.
+     */
     public boolean isEnabled(){
         if(bluetoothAdapter!=null) {
             return bluetoothAdapter.isEnabled();
@@ -126,11 +167,20 @@ public class Bluetooth {
         return false;
     }
 
+    /**
+     * This will call all the listeners on the main thread, so you don't have to runOnUiThread if you need to change some UI.
+     * @param activity The main Activity.
+     */
     public void setCallbackOnUI(Activity activity){
         this.activity = activity;
         this.runOnUi = true;
     }
 
+    /**
+     * Handle the result of showEnableDialog().
+     * @param requestCode requestCode given in onActivityResult.
+     * @param resultCode resultCode given in onActivityResult.
+     */
     public void onActivityResult(int requestCode, final int resultCode){
         if(bluetoothCallback!=null){
             if(requestCode==REQUEST_ENABLE_BT){
@@ -145,16 +195,30 @@ public class Bluetooth {
             }
         }
     }
-    
+
+    /**
+     * Connect to bluetooth device using its address.
+     * @param address Device address.
+     * @param insecureConnection True if you don't need the data to be encrypted.
+     */
     public void connectToAddress(String address, boolean insecureConnection) {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         connectToDevice(device, insecureConnection);
     }
-    
+
+    /**
+     * Connect to bluetooth device using its address.
+     * @param address Device address.
+     */
     public void connectToAddress(String address) {
         connectToAddress(address, false);
     }
-    
+
+    /**
+     * Connect to device already paired, using its name.
+     * @param name Device name.
+     * @param insecureConnection True if you don't need the data to be encrypted.
+     */
     public void connectToName(String name, boolean insecureConnection) {
         for (BluetoothDevice blueDevice : bluetoothAdapter.getBondedDevices()) {
             if (blueDevice.getName().equals(name)) {
@@ -163,19 +227,35 @@ public class Bluetooth {
             }
         }
     }
-    
+
+    /**
+     * Connect to device already paired, using its name.
+     * @param name Device name.
+     */
     public void connectToName(String name) {
         connectToName(name, false);
     }
 
+    /**
+     * Connect to bluetooth device.
+     * @param device Bluetooth device.
+     * @param insecureConnection True if you don't need the data to be encrypted.
+     */
     public void connectToDevice(BluetoothDevice device, boolean insecureConnection){
         new ConnectThread(device, insecureConnection).start();
     }
-    
+
+    /**
+     * Connect to bluetooth device.
+     * @param device Bluetooth device.
+     */
     public void connectToDevice(BluetoothDevice device){
         connectToDevice(device, false);
     }
 
+    /**
+     * Disconnect from bluetooth device.
+     */
     public void disconnect() {
         try {
             socket.close();
@@ -191,16 +271,25 @@ public class Bluetooth {
         }
     }
 
+    /**
+     * Check if the current device is connected to a bluetooth device.
+     * @return True if connected, false otherwise.
+     */
     public boolean isConnected(){
         return connected;
     }
 
+    /**
+     * Send string message to the connected device.
+     * @param msg String message.
+     * @param charset Charset used to encode the String. Default charset is UTF-8.
+     */
     public void send(String msg, String charset){
         try {
-            if(!TextUtils.isEmpty(charset)) {
-                out.write(msg.getBytes(charset));//Eg: "US-ASCII"
-            }else {
-                out.write(msg.getBytes());//Sending as UTF-8 as default
+            if(charset==null){
+                out.write(msg.getBytes());
+            } else{
+                out.write(msg.getBytes(charset));
             }
         } catch (final IOException e) {
             connected=false;
@@ -215,14 +304,25 @@ public class Bluetooth {
         }
     }
 
+    /**
+     * Send string message to the connected device.
+     * @param msg String message.
+     */
     public void send(String msg){
         send(msg, null);
     }
 
+    /**
+     * Get list of paired devices.
+     * @return List of BluetoothDevice.
+     */
     public List<BluetoothDevice> getPairedDevices(){
         return new ArrayList<>(bluetoothAdapter.getBondedDevices());
     }
 
+    /**
+     * Start scanning for nearby bluetooth devices.
+     */
     public void startScanning(){
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -234,11 +334,18 @@ public class Bluetooth {
         bluetoothAdapter.startDiscovery();
     }
 
+    /**
+     * Stop scanning for nearby bluetooth devices.
+     */
     public void stopScanning(){
         context.unregisterReceiver(scanReceiver);
         bluetoothAdapter.cancelDiscovery();
     }
 
+    /**
+     * Pair with a specific bluetooth device.
+     * @param device Bluetooth device.
+     */
     public void pair(BluetoothDevice device){
         context.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
         devicePair=device;
@@ -257,6 +364,10 @@ public class Bluetooth {
         }
     }
 
+    /**
+     * Forget a device.
+     * @param device Bluetooth device.
+     */
     public void unpair(BluetoothDevice device) {
         context.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
         devicePair=device;
@@ -488,26 +599,47 @@ public class Bluetooth {
         }
     };
 
+    /**
+     * Callback to receive device related updates.
+     * @param deviceCallback Non-null callback.
+     */
     public void setDeviceCallback(DeviceCallback deviceCallback) {
         this.deviceCallback = deviceCallback;
     }
 
-    public void removeCommunicationCallback(){
+    /**
+     * Remove device callback. No updates will be received anymore.
+     */
+    public void removeDeviceCallback(){
         this.deviceCallback = null;
     }
 
+    /**
+     * Callback to receive scanning related updates.
+     * @param discoveryCallback Non-null callback.
+     */
     public void setDiscoveryCallback(DiscoveryCallback discoveryCallback){
         this.discoveryCallback = discoveryCallback;
     }
 
+    /**
+     * Remove discovery callback. No updates will be received anymore.
+     */
     public void removeDiscoveryCallback(){
         this.discoveryCallback = null;
     }
 
+    /**
+     * Callback to receive bluetooth status related updates.
+     * @param bluetoothCallback Non-null callback.
+     */
     public void setBluetoothCallback(BluetoothCallback bluetoothCallback){
         this.bluetoothCallback = bluetoothCallback;
     }
 
+    /**
+     * Remove bluetooth callback. No updates will be received anymore.
+     */
     public void removeBluetoothCallback(){
         this.bluetoothCallback = null;
     }

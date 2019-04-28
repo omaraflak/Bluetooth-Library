@@ -3,8 +3,8 @@ package me.aflak.libraries.ui.chat.interactor;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 
-import me.aflak.bluetooth.BluetoothCallback;
-import me.aflak.bluetooth.DeviceCallback;
+import me.aflak.bluetooth.interfaces.BluetoothCallback;
+import me.aflak.bluetooth.interfaces.DeviceCallback;
 
 /**
  * Created by Omar on 20/12/2017.

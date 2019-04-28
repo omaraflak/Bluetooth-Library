@@ -21,6 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import me.aflak.bluetooth.constants.DeviceError;
+import me.aflak.bluetooth.constants.DiscoveryError;
+import me.aflak.bluetooth.interfaces.BluetoothCallback;
+import me.aflak.bluetooth.interfaces.DeviceCallback;
+import me.aflak.bluetooth.interfaces.DiscoveryCallback;
+import me.aflak.bluetooth.utils.ThreadHelper;
+
 /**
  * Created by Omar on 14/07/2015.
  */
@@ -264,7 +271,8 @@ public class Bluetooth {
                 ThreadHelper.run(runOnUi, activity, new Runnable() {
                     @Override
                     public void run() {
-                        deviceCallback.onError(e.getMessage());
+                        Log.w(getClass().getSimpleName(), e.getMessage());
+                        deviceCallback.onError(DeviceError.FAILED_WHILE_CLOSING);
                     }
                 });
             }
@@ -348,7 +356,7 @@ public class Bluetooth {
      */
     public void pair(BluetoothDevice device){
         context.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-        devicePair=device;
+        devicePair = device;
         try {
             Method method = device.getClass().getMethod("createBond", (Class[]) null);
             method.invoke(device, (Object[]) null);
@@ -357,7 +365,8 @@ public class Bluetooth {
                 ThreadHelper.run(runOnUi, activity, new Runnable() {
                     @Override
                     public void run() {
-                        discoveryCallback.onError(e.getMessage());
+                        Log.w(getClass().getSimpleName(), e.getMessage());
+                        discoveryCallback.onError(DiscoveryError.FAILED_TO_PAIR);
                     }
                 });
             }
@@ -370,7 +379,7 @@ public class Bluetooth {
      */
     public void unpair(BluetoothDevice device) {
         context.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-        devicePair=device;
+        devicePair = device;
         try {
             Method method = device.getClass().getMethod("removeBond", (Class[]) null);
             method.invoke(device, (Object[]) null);
@@ -379,7 +388,8 @@ public class Bluetooth {
                 ThreadHelper.run(runOnUi, activity, new Runnable() {
                     @Override
                     public void run() {
-                        discoveryCallback.onError(e.getMessage());
+                        Log.w(getClass().getSimpleName(), e.getMessage());
+                        discoveryCallback.onError(DiscoveryError.FAILED_TO_UNPAIR);
                     }
                 });
             }
@@ -417,7 +427,7 @@ public class Bluetooth {
 
     private class ConnectThread extends Thread {    
         ConnectThread(BluetoothDevice device, boolean insecureConnection) {
-            Bluetooth.this.device=device;
+            Bluetooth.this.device = device;
             try {
                 if(insecureConnection){
                     Bluetooth.this.socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
@@ -427,7 +437,8 @@ public class Bluetooth {
                 }
             } catch (IOException e) {
                 if(deviceCallback !=null){
-                    deviceCallback.onError(e.getMessage());
+                    Log.w(getClass().getSimpleName(), e.getMessage());
+                    deviceCallback.onError(DeviceError.FAILED_WHILE_CREATING_SOCKET);
                 }
             }
         }
@@ -468,7 +479,7 @@ public class Bluetooth {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
-                                deviceCallback.onError(closeException.getMessage());
+                                deviceCallback.onError(DeviceError.FAILED_WHILE_CLOSING);
                             }
                         });
                     }
@@ -490,7 +501,7 @@ public class Bluetooth {
                                 ThreadHelper.run(runOnUi, activity, new Runnable() {
                                     @Override
                                     public void run() {
-                                        discoveryCallback.onError("Bluetooth turned off");
+                                        discoveryCallback.onError(DiscoveryError.BLUETOOTH_DISABLED);
                                     }
                                 });
                             }

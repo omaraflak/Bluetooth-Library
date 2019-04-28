@@ -1,4 +1,4 @@
-package me.aflak.bluetooth;
+package me.aflak.bluetooth.interfaces;
 
 /**
  * Created by Omar on 20/12/2017.

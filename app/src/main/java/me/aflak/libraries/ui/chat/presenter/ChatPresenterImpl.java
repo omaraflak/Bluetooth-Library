@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.os.Handler;
 
 
-import me.aflak.bluetooth.BluetoothCallback;
-import me.aflak.bluetooth.DeviceCallback;
+import me.aflak.bluetooth.interfaces.BluetoothCallback;
+import me.aflak.bluetooth.interfaces.DeviceCallback;
 import me.aflak.libraries.R;
 import me.aflak.libraries.ui.chat.interactor.ChatInteractor;
 import me.aflak.libraries.ui.chat.view.ChatView;

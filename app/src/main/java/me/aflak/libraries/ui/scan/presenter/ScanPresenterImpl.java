@@ -2,10 +2,9 @@ package me.aflak.libraries.ui.scan.presenter;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
-import android.util.Log;
 
-import me.aflak.bluetooth.BluetoothCallback;
-import me.aflak.bluetooth.DiscoveryCallback;
+import me.aflak.bluetooth.interfaces.BluetoothCallback;
+import me.aflak.bluetooth.interfaces.DiscoveryCallback;
 import me.aflak.libraries.R;
 import me.aflak.libraries.ui.scan.interactor.ScanInteractor;
 import me.aflak.libraries.ui.scan.view.ScanView;

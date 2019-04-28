@@ -1,6 +1,10 @@
-package me.aflak.bluetooth;
+package me.aflak.bluetooth.interfaces;
 
 import android.bluetooth.BluetoothDevice;
+
+/**
+ * Created by Omar on 20/12/2017.
+ */
 
 public interface DiscoveryCallback{
     void onDiscoveryStarted();
@@ -8,5 +12,5 @@ public interface DiscoveryCallback{
     void onDeviceFound(BluetoothDevice device);
     void onDevicePaired(BluetoothDevice device);
     void onDeviceUnpaired(BluetoothDevice device);
-    void onError(String message);
+    void onError(int errorCode);
 }

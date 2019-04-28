@@ -1,9 +1,9 @@
-package me.aflak.bluetooth;
+package me.aflak.bluetooth.utils;
 
 import android.app.Activity;
 
 /**
- * Created by tribe on 1/29/18.
+ * Created by Omar on 1/29/18.
  */
 
 public class ThreadHelper {

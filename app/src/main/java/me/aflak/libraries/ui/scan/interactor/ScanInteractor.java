@@ -5,8 +5,8 @@ import android.bluetooth.BluetoothDevice;
 
 import java.util.List;
 
-import me.aflak.bluetooth.BluetoothCallback;
-import me.aflak.bluetooth.DiscoveryCallback;
+import me.aflak.bluetooth.interfaces.BluetoothCallback;
+import me.aflak.bluetooth.interfaces.DiscoveryCallback;
 
 /**
  * Created by Omar on 20/12/2017.

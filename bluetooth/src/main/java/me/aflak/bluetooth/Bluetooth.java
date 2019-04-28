@@ -42,7 +42,7 @@ public class Bluetooth {
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket socket;
-    private BluetoothDevice device, devicePair;
+    private BluetoothDevice device;
     private BufferedReader input;
     private OutputStream out;
 
@@ -356,7 +356,6 @@ public class Bluetooth {
      */
     public void pair(BluetoothDevice device){
         context.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-        devicePair = device;
         try {
             Method method = device.getClass().getMethod("createBond", (Class[]) null);
             method.invoke(device, (Object[]) null);
@@ -379,7 +378,6 @@ public class Bluetooth {
      */
     public void unpair(BluetoothDevice device) {
         context.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-        devicePair = device;
         try {
             Method method = device.getClass().getMethod("removeBond", (Class[]) null);
             method.invoke(device, (Object[]) null);
@@ -425,7 +423,7 @@ public class Bluetooth {
         }
     }
 
-    private class ConnectThread extends Thread {    
+    private class ConnectThread extends Thread {
         ConnectThread(BluetoothDevice device, boolean insecureConnection) {
             Bluetooth.this.device = device;
             try {
@@ -548,6 +546,7 @@ public class Bluetooth {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
+                final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 final int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
                 final int prevState	= intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
 
@@ -557,7 +556,7 @@ public class Bluetooth {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
-                                discoveryCallback.onDevicePaired(devicePair);
+                                discoveryCallback.onDevicePaired(device);
                             }
                         });
                     }
@@ -567,7 +566,7 @@ public class Bluetooth {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
-                                discoveryCallback.onDeviceUnpaired(devicePair);
+                                discoveryCallback.onDeviceUnpaired(device);
                             }
                         });
                     }

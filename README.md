@@ -1,14 +1,14 @@
-# Android Bluetooth Library [ ![Download](https://api.bintray.com/packages/omaflak/maven/bluetooth/images/download.svg) ](https://bintray.com/omaflak/maven/bluetooth/_latestVersion)
+# Android Bluetooth Client Library [ ![Download](https://api.bintray.com/packages/omaflak/maven/bluetooth/images/download.svg) ](https://bintray.com/omaflak/maven/bluetooth/_latestVersion)
 
 <img src="Logotype primary.png" width="60%" height="60%" />
 
-This is an Android library that simplifies the process of bluetooth communication.
+This is an Android library that simplifies the process of bluetooth communication, **client side**.
 
 # Important
 
 I used a BufferedReader to read data from the bluetooth socket. As I'm reading with readLine(), each message you're sending to the Android must end with a **\n**. Otherwise it won't be received.
 
-The class uses listeners so everything should be really easy! Enjoy :)
+***This library does not support BLE devices***
 
 # Install
 

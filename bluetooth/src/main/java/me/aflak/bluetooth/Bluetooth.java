@@ -26,6 +26,8 @@ import me.aflak.bluetooth.constants.DiscoveryError;
 import me.aflak.bluetooth.interfaces.BluetoothCallback;
 import me.aflak.bluetooth.interfaces.DeviceCallback;
 import me.aflak.bluetooth.interfaces.DiscoveryCallback;
+import me.aflak.bluetooth.utils.OnFailureListener;
+import me.aflak.bluetooth.utils.OnSuccessListener;
 import me.aflak.bluetooth.utils.ThreadHelper;
 
 /**
@@ -41,17 +43,14 @@ public class Bluetooth {
 
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothSocket socket;
-    private BluetoothDevice device;
-    private BufferedReader input;
-    private OutputStream out;
+    private BluetoothDevice deviceConnected;
 
     private DeviceCallback deviceCallback;
     private DiscoveryCallback discoveryCallback;
     private BluetoothCallback bluetoothCallback;
-    private boolean connected;
 
-    private boolean runOnUi;
+    private ReceiveThread receiveThread;
+    private boolean connected, runOnUi;
 
     /**
      * Init Bluetooth object. Default UUID will be used.
@@ -144,7 +143,7 @@ public class Bluetooth {
      * @return BluetoothSocket.
      */
     public BluetoothSocket getSocket(){
-        return socket;
+        return receiveThread.getSocket();
     }
 
     /**
@@ -248,8 +247,42 @@ public class Bluetooth {
      * @param device Bluetooth device.
      * @param insecureConnection True if you don't need the data to be encrypted.
      */
-    public void connectToDevice(BluetoothDevice device, boolean insecureConnection){
-        new ConnectThread(device, insecureConnection).start();
+    public void connectToDevice(final BluetoothDevice device, boolean insecureConnection){
+        if(bluetoothAdapter.isDiscovering()) {
+            bluetoothAdapter.cancelDiscovery();
+        }
+        final BluetoothSocket socket = createBluetoothSocket(device, insecureConnection);
+        if(socket != null) {
+            connectInThread(socket, new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    deviceConnected = device;
+                    connected = true;
+                    if(deviceCallback !=null) {
+                        ThreadHelper.run(runOnUi, activity, new Runnable() {
+                            @Override
+                            public void run() {
+                                deviceCallback.onDeviceConnected(device);
+                            }
+                        });
+                    }
+                    receiveThread = new ReceiveThread(socket);
+                    receiveThread.start();
+                }
+            }, new OnFailureListener<IOException>() {
+                @Override
+                public void onFailure(final IOException e) {
+                    if(deviceCallback !=null) {
+                        ThreadHelper.run(runOnUi, activity, new Runnable() {
+                            @Override
+                            public void run() {
+                                deviceCallback.onConnectError(device, e.getMessage());
+                            }
+                        });
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -265,7 +298,7 @@ public class Bluetooth {
      */
     public void disconnect() {
         try {
-            socket.close();
+            receiveThread.getSocket().close();
         } catch (final IOException e) {
             if(deviceCallback !=null) {
                 ThreadHelper.run(runOnUi, activity, new Runnable() {
@@ -293,6 +326,7 @@ public class Bluetooth {
      * @param charset Charset used to encode the String. Default charset is UTF-8.
      */
     public void send(String msg, String charset){
+        OutputStream out = receiveThread.getOut();
         try {
             if(charset==null){
                 out.write(msg.getBytes());
@@ -300,12 +334,12 @@ public class Bluetooth {
                 out.write(msg.getBytes(charset));
             }
         } catch (final IOException e) {
-            connected=false;
+            connected = false;
             if(deviceCallback !=null){
                 ThreadHelper.run(runOnUi, activity, new Runnable() {
                     @Override
                     public void run() {
-                        deviceCallback.onDeviceDisconnected(device, e.getMessage());
+                        deviceCallback.onDeviceDisconnected(deviceConnected, e.getMessage());
                     }
                 });
             }
@@ -394,11 +428,57 @@ public class Bluetooth {
         }
     }
 
+    private BluetoothSocket createBluetoothSocket(BluetoothDevice device, boolean insecureConnection){
+        BluetoothSocket socket = null;
+        try {
+            if(insecureConnection){
+                socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+            }
+            else{
+                socket = device.createRfcommSocketToServiceRecord(uuid);
+            }
+        } catch (IOException e) {
+            if(deviceCallback !=null){
+                Log.w(getClass().getSimpleName(), e.getMessage());
+                deviceCallback.onError(DeviceError.FAILED_WHILE_CREATING_SOCKET);
+            }
+        }
+        return socket;
+    }
+
+    private void connectInThread(final BluetoothSocket socket, final OnSuccessListener<Void> onSuccessListener, final OnFailureListener<IOException> onFailureListener){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    socket.connect();
+                    onSuccessListener.onSuccess(null);
+                } catch (final IOException e) {
+                    onFailureListener.onFailure(e);
+                }
+            }
+        }).start();
+    }
+
     private class ReceiveThread extends Thread implements Runnable{
+        private BluetoothSocket socket;
+        private BufferedReader in;
+        private OutputStream out;
+
+        public ReceiveThread(BluetoothSocket socket) {
+            this.socket = socket;
+            try {
+                out = socket.getOutputStream();
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            } catch (IOException e) {
+                Log.w(getClass().getSimpleName(), e.getMessage());
+            }
+        }
+
         public void run(){
             String msg;
             try {
-                while((msg = input.readLine()) != null) {
+                while((msg = in.readLine()) != null) {
                     if(deviceCallback != null){
                         final String msgCopy = msg;
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
@@ -410,79 +490,28 @@ public class Bluetooth {
                     }
                 }
             } catch (final IOException e) {
-                connected=false;
+                connected = false;
                 if(deviceCallback != null){
                     ThreadHelper.run(runOnUi, activity, new Runnable() {
                         @Override
                         public void run() {
-                            deviceCallback.onDeviceDisconnected(device, e.getMessage());
+                            deviceCallback.onDeviceDisconnected(deviceConnected, e.getMessage());
                         }
                     });
                 }
             }
         }
-    }
 
-    private class ConnectThread extends Thread {
-        ConnectThread(BluetoothDevice device, boolean insecureConnection) {
-            Bluetooth.this.device = device;
-            try {
-                if(insecureConnection){
-                    Bluetooth.this.socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
-                }
-                else{
-                    Bluetooth.this.socket = device.createRfcommSocketToServiceRecord(uuid);
-                }
-            } catch (IOException e) {
-                if(deviceCallback !=null){
-                    Log.w(getClass().getSimpleName(), e.getMessage());
-                    deviceCallback.onError(DeviceError.FAILED_WHILE_CREATING_SOCKET);
-                }
-            }
+        public BluetoothSocket getSocket() {
+            return socket;
         }
 
-        public void run() {
-            bluetoothAdapter.cancelDiscovery();
+        public BufferedReader getIn() {
+            return in;
+        }
 
-            try {
-                socket.connect();
-                out = socket.getOutputStream();
-                input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                connected=true;
-
-                new ReceiveThread().start();
-
-                if(deviceCallback !=null) {
-                    ThreadHelper.run(runOnUi, activity, new Runnable() {
-                        @Override
-                        public void run() {
-                            deviceCallback.onDeviceConnected(device);
-                        }
-                    });
-                }
-            } catch (final IOException e) {
-                if(deviceCallback !=null) {
-                    ThreadHelper.run(runOnUi, activity, new Runnable() {
-                        @Override
-                        public void run() {
-                            deviceCallback.onConnectError(device, e.getMessage());
-                        }
-                    });
-                }
-
-                try {
-                    socket.close();
-                } catch (final IOException closeException) {
-                    if (deviceCallback != null) {
-                        ThreadHelper.run(runOnUi, activity, new Runnable() {
-                            @Override
-                            public void run() {
-                                deviceCallback.onError(DeviceError.FAILED_WHILE_CLOSING);
-                            }
-                        });
-                    }
-                }
-            }
+        public OutputStream getOut() {
+            return out;
         }
     }
 

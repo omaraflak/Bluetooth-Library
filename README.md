@@ -18,49 +18,115 @@ Add to your gradle dependencies:
 implementation 'me.aflak.libraries:bluetooth:1.3.5'
 ```
 
-## Init with a Context
+## Basic Settings
+
+### Asking user for bluetooth activation
 
 ```java
-// you must have bluetooth permissions before calling the constructor
-Bluetooth bluetooth = new Bluetooth(context);
-//
-// ...
-//
-@Override
-protected void onStart() {
-    super.onStart();
-    bluetooth.onStart();
-    bluetooth.enable();
-}
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_scan);
+        // Need to ask for bluetooth permissions before calling constructor !
+        // Permissions are {BLUETOOTH, BLUETOOTH_ADMIN, ACCESS_COARSE_LOCATION}
+        bluetooth = new Bluetooth(this);
+        bluetooth.setBluetoothCallback(bluetoothCallback);
+    }
+    
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bluetooth.onStart();
+        if(bluetooth.isEnabled()){
+            // doStuffWhenBluetoothOn() ...
+        } else {
+            bluetooth.showEnableDialog(ScanActivity.this);
+        }
+    }
 
-@Override
-protected void onStop() {
-    super.onStop();
-    bluetooth.onStop();
-}
+    @Override
+    protected void onStop() {
+        super.onStop();
+        bluetooth.onStop();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        bluetooth.onActivityResult(requestCode, resultCode);
+    }
+
+    private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
+        @Override public void onBluetoothTurningOn() {}
+
+        @Override
+        public void onBluetoothOn() {
+            // doStuffWhenBluetoothOn() ...
+        }
+
+        @Override public void onBluetoothTurningOff() {}
+        @Override public void onBluetoothOff() {}
+
+        @Override
+        public void onUserDeniedActivation() {
+            // handle activation denial...
+        }
+    };
+```
+
+### Without asking user for bluetooth activation
+
+```java
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_scan);
+        // Need to ask for bluetooth permissions before calling constructor !
+        // Permissions are {BLUETOOTH, BLUETOOTH_ADMIN, ACCESS_COARSE_LOCATION}
+        bluetooth = new Bluetooth(this);
+        bluetooth.setBluetoothCallback(bluetoothCallback);
+    }
+    
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bluetooth.onStart();
+        if(bluetooth.isEnabled()){
+            // doStuffWhenBluetoothOn() ...
+        } else {
+            bluetooth.enable()
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        bluetooth.onStop();
+    }
+
+    private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
+        @Override public void onBluetoothTurningOn() {}
+        
+        @Override
+        public void onBluetoothOn() {
+            // doStuffWhenBluetoothOn() ...
+        }
+
+        @Override public void onBluetoothTurningOff() {}
+        @Override public void onBluetoothOff() {}
+        @Override public void onUserDeniedActivation() {}
+    };
 ```
 	
 ## Listen on bluetooth state changes
 
 ```java
 bluetooth.setBluetoothCallback(new BluetoothCallback() {
-    @Override
-    public void onBluetoothTurningOn() {}
-
-    @Override
-    public void onBluetoothOn() {}
-
-    @Override
-    public void onBluetoothTurningOff() {}
-
-    @Override
-    public void onBluetoothOff() {}
-
-    @Override
-    public void onUserDeniedActivation() {
-        // when using bluetooth.showEnableDialog()
-        // you will also have to call bluetooth.onActivityResult()
-    }
+    @Override public void onBluetoothTurningOn() {}
+    @Override public void onBluetoothOn() {}
+    @Override public void onBluetoothTurningOff() {}
+    @Override public void onBluetoothOff() {}
+    @Override public void onUserDeniedActivation() {}
 });
 ```
 	
@@ -108,7 +174,7 @@ bluetooth.connectToDevice(device);
 ## Send a message
 
 ```java
-bluetooth.send("message");
+bluetooth.send("hello, world");
 ```
 	
 ## Get paired devices

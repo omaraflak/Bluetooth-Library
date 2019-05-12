@@ -25,8 +25,7 @@ implementation 'me.aflak.libraries:bluetooth:1.3.5'
 ```java
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scan);
+        // ...
         // Need to ask for bluetooth permissions before calling constructor !
         // Permissions are {BLUETOOTH, BLUETOOTH_ADMIN, ACCESS_COARSE_LOCATION}
         bluetooth = new Bluetooth(this);
@@ -58,14 +57,13 @@ implementation 'me.aflak.libraries:bluetooth:1.3.5'
 
     private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
         @Override public void onBluetoothTurningOn() {}
+        @Override public void onBluetoothTurningOff() {}
+        @Override public void onBluetoothOff() {}
 
         @Override
         public void onBluetoothOn() {
             // doStuffWhenBluetoothOn() ...
         }
-
-        @Override public void onBluetoothTurningOff() {}
-        @Override public void onBluetoothOff() {}
 
         @Override
         public void onUserDeniedActivation() {
@@ -79,8 +77,7 @@ implementation 'me.aflak.libraries:bluetooth:1.3.5'
 ```java
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scan);
+        // ...
         // Need to ask for bluetooth permissions before calling constructor !
         // Permissions are {BLUETOOTH, BLUETOOTH_ADMIN, ACCESS_COARSE_LOCATION}
         bluetooth = new Bluetooth(this);
@@ -106,15 +103,14 @@ implementation 'me.aflak.libraries:bluetooth:1.3.5'
 
     private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
         @Override public void onBluetoothTurningOn() {}
+        @Override public void onBluetoothTurningOff() {}
+        @Override public void onBluetoothOff() {}
+        @Override public void onUserDeniedActivation() {}
         
         @Override
         public void onBluetoothOn() {
             // doStuffWhenBluetoothOn() ...
         }
-
-        @Override public void onBluetoothTurningOff() {}
-        @Override public void onBluetoothOff() {}
-        @Override public void onUserDeniedActivation() {}
     };
 ```
 	

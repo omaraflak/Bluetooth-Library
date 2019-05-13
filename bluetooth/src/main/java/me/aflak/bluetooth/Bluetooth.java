@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -203,10 +204,11 @@ public class Bluetooth {
      * Connect to bluetooth device using its address.
      * @param address Device address.
      * @param insecureConnection True if you don't need the data to be encrypted.
+     * @param withPortTrick https://stackoverflow.com/a/25647197/5552022.
      */
-    public void connectToAddress(String address, boolean insecureConnection) {
+    public void connectToAddress(String address, boolean insecureConnection, boolean withPortTrick) {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-        connectToDevice(device, insecureConnection);
+        connectToDevice(device, insecureConnection, withPortTrick);
     }
 
     /**
@@ -214,18 +216,27 @@ public class Bluetooth {
      * @param address Device address.
      */
     public void connectToAddress(String address) {
-        connectToAddress(address, false);
+        connectToAddress(address, false, false);
+    }
+
+    /**
+     * Connect to bluetooth device using its address and setting port to 1: https://stackoverflow.com/a/25647197/5552022.
+     * @param address Device address.
+     */
+    public void connectToAddressWithPortTrick(String address) {
+        connectToAddress(address, false, true);
     }
 
     /**
      * Connect to device already paired, using its name.
      * @param name Device name.
      * @param insecureConnection True if you don't need the data to be encrypted.
+     * @param withPortTrick https://stackoverflow.com/a/25647197/5552022.
      */
-    public void connectToName(String name, boolean insecureConnection) {
+    public void connectToName(String name, boolean insecureConnection, boolean withPortTrick) {
         for (BluetoothDevice blueDevice : bluetoothAdapter.getBondedDevices()) {
             if (blueDevice.getName().equals(name)) {
-                connectToDevice(blueDevice, insecureConnection);
+                connectToDevice(blueDevice, insecureConnection, withPortTrick);
                 return;
             }
         }
@@ -236,19 +247,28 @@ public class Bluetooth {
      * @param name Device name.
      */
     public void connectToName(String name) {
-        connectToName(name, false);
+        connectToName(name, false, false);
+    }
+
+    /**
+     * Connect to device already paired, using its name and setting port to 1: https://stackoverflow.com/a/25647197/5552022.
+     * @param name Device name.
+     */
+    public void connectToNameWithPortTrick(String name) {
+        connectToName(name, false, true);
     }
 
     /**
      * Connect to bluetooth device.
      * @param device Bluetooth device.
      * @param insecureConnection True if you don't need the data to be encrypted.
+     * @param withPortTrick https://stackoverflow.com/a/25647197/5552022.
      */
-    public void connectToDevice(final BluetoothDevice device, boolean insecureConnection){
+    public void connectToDevice(final BluetoothDevice device, boolean insecureConnection, boolean withPortTrick){
         if(bluetoothAdapter.isDiscovering()) {
             bluetoothAdapter.cancelDiscovery();
         }
-        connectInThread(device, insecureConnection);
+        connect(device, insecureConnection, withPortTrick);
     }
 
     /**
@@ -256,7 +276,15 @@ public class Bluetooth {
      * @param device Bluetooth device.
      */
     public void connectToDevice(BluetoothDevice device){
-        connectToDevice(device, false);
+        connectToDevice(device, false, false);
+    }
+
+    /**
+     * Connect to bluetooth device.
+     * @param device Bluetooth device.
+     */
+    public void connectToDeviceWithPortTrick(BluetoothDevice device){
+        connectToDevice(device, false, false);
     }
 
     /**
@@ -412,38 +440,66 @@ public class Bluetooth {
         return socket;
     }
 
-    private void connectInThread(final BluetoothDevice device, boolean insecureConnection){
-        final BluetoothSocket socket = createBluetoothSocket(device, insecureConnection);
-        if(socket != null) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        socket.connect();
-                        connected = true;
-                        if(deviceCallback !=null) {
-                            ThreadHelper.run(runOnUi, activity, new Runnable() {
-                                @Override
-                                public void run() {
-                                    deviceCallback.onDeviceConnected(device);
-                                }
-                            });
-                        }
-                        receiveThread = new ReceiveThread(socket, device);
-                        receiveThread.start();
-                    } catch (final IOException e) {
-                        if(deviceCallback !=null) {
-                            ThreadHelper.run(runOnUi, activity, new Runnable() {
-                                @Override
-                                public void run() {
-                                    deviceCallback.onConnectError(device, e.getMessage());
-                                }
-                            });
-                        }
+    private BluetoothSocket createBluetoothSocketWithPortTrick(BluetoothDevice device){
+        BluetoothSocket socket = null;
+        try {
+            socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device,1);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {}
+        return socket;
+    }
+
+    private void connect(BluetoothDevice device, boolean insecureConnection, boolean withPortTrick){
+        BluetoothSocket socket = null;
+        if(withPortTrick){
+            socket = createBluetoothSocketWithPortTrick(device);
+        }
+        if(socket==null){
+            try {
+                if(insecureConnection){
+                    socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+                }
+                else{
+                    socket = device.createRfcommSocketToServiceRecord(uuid);
+                }
+            } catch (IOException e) {
+                if(deviceCallback !=null){
+                    Log.w(getClass().getSimpleName(), e.getMessage());
+                    deviceCallback.onError(DeviceError.FAILED_WHILE_CREATING_SOCKET);
+                }
+            }
+        }
+        connectInThread(socket, device);
+    }
+
+    private void connectInThread(final BluetoothSocket socket, final BluetoothDevice device){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    socket.connect();
+                    connected = true;
+                    if(deviceCallback !=null) {
+                        ThreadHelper.run(runOnUi, activity, new Runnable() {
+                            @Override
+                            public void run() {
+                                deviceCallback.onDeviceConnected(device);
+                            }
+                        });
+                    }
+                    receiveThread = new ReceiveThread(socket, device);
+                    receiveThread.start();
+                } catch (final IOException e) {
+                    if(deviceCallback !=null) {
+                        ThreadHelper.run(runOnUi, activity, new Runnable() {
+                            @Override
+                            public void run() {
+                                deviceCallback.onConnectError(device, e.getMessage());
+                            }
+                        });
                     }
                 }
-            }).start();
-        }
+            }
+        }).start();
     }
 
     private class ReceiveThread extends Thread implements Runnable{

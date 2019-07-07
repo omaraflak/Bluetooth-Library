@@ -478,6 +478,7 @@ public class Bluetooth {
                 try {
                     socket.connect();
                     connected = true;
+                    receiveThread = new ReceiveThread(socket, device);
                     if(deviceCallback !=null) {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
@@ -486,7 +487,6 @@ public class Bluetooth {
                             }
                         });
                     }
-                    receiveThread = new ReceiveThread(socket, device);
                     receiveThread.start();
                 } catch (final IOException e) {
                     if(deviceCallback !=null) {

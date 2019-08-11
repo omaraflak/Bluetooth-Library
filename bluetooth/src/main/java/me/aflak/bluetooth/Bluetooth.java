@@ -14,6 +14,7 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +29,8 @@ import me.aflak.bluetooth.constants.DiscoveryError;
 import me.aflak.bluetooth.interfaces.BluetoothCallback;
 import me.aflak.bluetooth.interfaces.DeviceCallback;
 import me.aflak.bluetooth.interfaces.DiscoveryCallback;
+import me.aflak.bluetooth.reader.LineReader;
+import me.aflak.bluetooth.reader.SocketReader;
 import me.aflak.bluetooth.utils.ThreadHelper;
 
 /**
@@ -50,6 +53,8 @@ public class Bluetooth {
 
     private ReceiveThread receiveThread;
     private boolean connected, runOnUi;
+
+    private Class readerClass;
 
     /**
      * Init Bluetooth object. Default UUID will be used.
@@ -82,16 +87,10 @@ public class Bluetooth {
      * Start bluetooth service.
      */
     public void onStart(){
-        if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
-            bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-            if(bluetoothManager!=null) {
-                bluetoothAdapter = bluetoothManager.getAdapter();
-            }
+        bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        if(bluetoothManager != null) {
+            bluetoothAdapter = bluetoothManager.getAdapter();
         }
-        else{
-            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        }
-
         context.registerReceiver(bluetoothReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
@@ -512,9 +511,9 @@ public class Bluetooth {
     }
 
     private class ReceiveThread extends Thread implements Runnable{
+        private SocketReader reader;
         private BluetoothSocket socket;
         private BluetoothDevice device;
-        private BufferedReader in;
         private OutputStream out;
 
         public ReceiveThread(BluetoothSocket socket, BluetoothDevice device) {
@@ -522,18 +521,30 @@ public class Bluetooth {
             this.device = device;
             try {
                 out = socket.getOutputStream();
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                this.reader = new LineReader(socket.getInputStream());
             } catch (IOException e) {
                 Log.w(getClass().getSimpleName(), e.getMessage());
             }
         }
 
-        public void run(){
-            String msg;
+        public ReceiveThread(Class<?> readerClass, BluetoothSocket socket, BluetoothDevice device) {
+            this.socket = socket;
+            this.device = device;
             try {
-                while((msg = in.readLine()) != null) {
+                out = socket.getOutputStream();
+                InputStream in = socket.getInputStream();
+                this.reader = (SocketReader) readerClass.getDeclaredConstructor(InputStream.class).newInstance(in);
+            } catch (IOException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                Log.w(getClass().getSimpleName(), e.getMessage());
+            }
+        }
+
+        public void run(){
+            byte[] msg;
+            try {
+                while((msg = reader.read()) != null) {
                     if(deviceCallback != null){
-                        final String msgCopy = msg;
+                        final byte[] msgCopy = msg;
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {

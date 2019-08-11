@@ -4,12 +4,6 @@
 
 This is an Android library that simplifies the process of bluetooth communication, **client side**.
 
-# Important
-
-I used a BufferedReader to read data from the bluetooth socket. As I'm reading with readLine(), each message you're sending to the Android must end with a **\n**. Otherwise it won't be received.
-
-***This library does not support BLE devices***
-
 # Install
 
 Add to your gradle dependencies:
@@ -18,7 +12,7 @@ Add to your gradle dependencies:
 implementation 'me.aflak.libraries:bluetooth:1.3.7'
 ```
 
-## Basic Settings
+## Enable bluetooth
 
 ### Asking user for bluetooth activation
 
@@ -113,20 +107,10 @@ private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
     }
 };
 ```
-	
-## Listen on bluetooth state changes
 
-```java
-bluetooth.setBluetoothCallback(new BluetoothCallback() {
-    @Override public void onBluetoothTurningOn() {}
-    @Override public void onBluetoothOn() {}
-    @Override public void onBluetoothTurningOff() {}
-    @Override public void onBluetoothOff() {}
-    @Override public void onUserDeniedActivation() {}
-});
-```
-	
-## Listen on discovery and pairing
+## Discover devices and pair
+
+### Listener
 
 ```java
 bluetooth.setDiscoveryCallback(new DiscoveryCallback() {
@@ -139,14 +123,22 @@ bluetooth.setDiscoveryCallback(new DiscoveryCallback() {
 });
 ```
 
-## Scan and Pair
+### Scan and Pair
 
 ```java
 bluetooth.startScanning();
 bluetooth.pair(device);
 ```
-	
-## Listen on bluetooth socket
+
+### Get paired devices
+
+```java
+List<BluetoothDevice> devices = bluetooth.getPairedDevices();
+```
+
+## Connect to device and communicate
+
+### Listener
 
 ```java
 bluetooth.setDeviceCallback(new DeviceCallback() {
@@ -158,7 +150,7 @@ bluetooth.setDeviceCallback(new DeviceCallback() {
 });
 ```
 	
-## Connect to device
+### Connect to device
 
 ```java
 // three options
@@ -167,7 +159,7 @@ bluetooth.connectToAddress("address");
 bluetooth.connectToDevice(device);
 ```
 
-## Connect to device using port trick
+### Connect to device using port trick
 
 See this post for details: https://stackoverflow.com/a/25647197/5552022
 ```java
@@ -178,21 +170,20 @@ bluetooth.connectToDeviceWithPortTrick(device);
 
 *Should be avoided*
 	
-## Send a message
+### Send a message
 
 ```java
 bluetooth.send("hello, world");
-```
-	
-## Get paired devices
-
-```java
-List<BluetoothDevice> devices = bluetooth.getPairedDevices();
+bluetooth.send(new byte[]{61, 62, 63});
 ```
 
 # JavaDoc
 
 JavaDoc is in `doc` folder.
+
+# Example Code
+
+[app module](https://github.com/OmarAflak/Bluetooth-Library/tree/master/app/src/main/java/me/aflak/libraries)
 
 # Download Demo App
 

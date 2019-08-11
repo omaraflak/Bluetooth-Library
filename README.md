@@ -177,6 +177,34 @@ bluetooth.send("hello, world");
 bluetooth.send(new byte[]{61, 62, 63});
 ```
 
+## Receive messages
+
+The default behavior of the library is the read from the input stream until it hits a new line, it will then propagate the message through listeners as a byte array.
+You can change the way the library reads from the socket by creating your own reader class. It must extend from `SocketReader`.
+The default behavior is actually one example of implementation :
+
+```java
+public class LineReader extends SocketReader{
+    private BufferedReader reader;
+
+    public LineReader(InputStream inputStream) {
+        super(inputStream);
+        reader = new BufferedReader(new InputStreamReader(inputStream));
+    }
+
+    @Override
+    public byte[] read() throws IOException {
+        return reader.readLine().getBytes();
+    }
+}
+```
+
+Then you can use your reader :
+
+```java
+bluetooth.setReader(LineReader.class);
+```
+
 # JavaDoc
 
 JavaDoc is in `doc` folder.

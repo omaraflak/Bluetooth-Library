@@ -47,7 +47,7 @@ public class Bluetooth {
     private DiscoveryCallback discoveryCallback;
     private BluetoothCallback bluetoothCallback;
 
-    private ReceiveThread receiveThread;
+    private ArrayList<ReceiveThread> receiveThreads = new ArrayList<>();
     private boolean connected, runOnUi;
 
     /**
@@ -137,10 +137,22 @@ public class Bluetooth {
     }
 
     /**
-     * Get BluetoothSocket used for connection.
+     * Get BluetoothSockets used for connection.
+     * @return ArrayList<BluetoothSocket>.
+     */
+    public ArrayList<BluetoothSocket> getSockets() {
+        ArrayList<BluetoothSocket> sockets = new ArrayList<>();
+        for (ReceiveThread receiveThread : receiveThreads) {
+            sockets.add(getThreadSocket(receiveThread));
+        }
+        return sockets;
+    }
+
+    /**
+     * Get BluetoothSocket used for connection from thread.
      * @return BluetoothSocket.
      */
-    public BluetoothSocket getSocket(){
+    public BluetoothSocket getThreadSocket(ReceiveThread receiveThread){
         return receiveThread.getSocket();
     }
 
@@ -288,9 +300,18 @@ public class Bluetooth {
     }
 
     /**
-     * Disconnect from bluetooth device.
+     * Disconnect from all bluetooth devices.
      */
     public void disconnect() {
+        for (ReceiveThread receiveThread: receiveThreads) {
+            disconnectThread(receiveThread);
+        }
+    }
+
+    /**
+     * Disconnect from bluetooth device.
+     */
+    public void disconnectThread(ReceiveThread receiveThread) {
         try {
             receiveThread.getSocket().close();
         } catch (final IOException e) {
@@ -315,11 +336,33 @@ public class Bluetooth {
     }
 
     /**
-     * Send string message to the connected device.
+     * Send string message to all the connected devices.
      * @param msg String message.
      * @param charset Charset used to encode the String. Default charset is UTF-8.
      */
     public void send(String msg, String charset){
+        for (ReceiveThread receiveThread: receiveThreads) {
+            sendToThread(msg, charset, receiveThread);
+        }
+    }
+
+    /**
+     * Send string message to all the connected devices.
+     * @param msg String message.
+     */
+    public void send(String msg){
+        for (ReceiveThread receiveThread: receiveThreads) {
+            sendToThread(msg, null, receiveThread);
+        }
+    }
+
+    /**
+     * Send string message to the connected device.
+     * @param msg String message.
+     * @param charset Charset used to encode the String. Default charset is UTF-8.
+     * @param receiveThread Thread for the connected device.
+     */
+    public void sendToThread(String msg, String charset, final ReceiveThread receiveThread){
         OutputStream out = receiveThread.getOutputStream();
         try {
             if(charset==null){
@@ -338,14 +381,6 @@ public class Bluetooth {
                 });
             }
         }
-    }
-
-    /**
-     * Send string message to the connected device.
-     * @param msg String message.
-     */
-    public void send(String msg){
-        send(msg, null);
     }
 
     /**
@@ -478,7 +513,8 @@ public class Bluetooth {
                 try {
                     socket.connect();
                     connected = true;
-                    receiveThread = new ReceiveThread(socket, device);
+                    ReceiveThread receiveThread = new ReceiveThread(socket, device);
+                    receiveThreads.add(receiveThread);
                     if(deviceCallback !=null) {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override

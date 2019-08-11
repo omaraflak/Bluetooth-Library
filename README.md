@@ -152,7 +152,7 @@ bluetooth.pair(device);
 bluetooth.setDeviceCallback(new DeviceCallback() {
     @Override public void onDeviceConnected(BluetoothDevice device) {}
     @Override public void onDeviceDisconnected(BluetoothDevice device, String message) {}
-    @Override public void onMessage(String message) {}
+    @Override public void onMessage(byte[] message) {}
     @Override public void onError(String message) {}
     @Override public void onConnectError(BluetoothDevice device, String message) {}
 });

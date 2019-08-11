@@ -1,0 +1,5 @@
+me.aflak.bluetooth
+me.aflak.bluetooth.constants
+me.aflak.bluetooth.interfaces
+me.aflak.bluetooth.reader
+me.aflak.bluetooth.utils

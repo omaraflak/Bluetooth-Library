@@ -80,8 +80,9 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onMessage(String message) {
-            appendToChat("<- "+message);
+        public void onMessage(byte[] message) {
+            String str = new String(message);
+            appendToChat("<- "+str);
         }
 
         @Override

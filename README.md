@@ -190,6 +190,10 @@ bluetooth.send("hello, world");
 List<BluetoothDevice> devices = bluetooth.getPairedDevices();
 ```
 
+# JavaDoc
+
+JavaDoc is in `doc` folder.
+
 # Download Demo App
 
 <p align="center">

@@ -76,6 +76,7 @@ public class Bluetooth {
     private void initialize(Context context, UUID uuid){
         this.context = context;
         this.uuid = uuid;
+        this.readerClass = LineReader.class;
         this.deviceCallback = null;
         this.discoveryCallback = null;
         this.bluetoothCallback = null;
@@ -178,6 +179,10 @@ public class Bluetooth {
     public void setCallbackOnUI(Activity activity){
         this.activity = activity;
         this.runOnUi = true;
+    }
+
+    public void setReader(Class readerClass){
+        this.readerClass = readerClass;
     }
 
     /**
@@ -452,7 +457,9 @@ public class Bluetooth {
         BluetoothSocket socket = null;
         try {
             socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device,1);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {}
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            Log.w(getClass().getSimpleName(), e.getMessage());
+        }
         return socket;
     }
 
@@ -486,7 +493,7 @@ public class Bluetooth {
                 try {
                     socket.connect();
                     connected = true;
-                    receiveThread = new ReceiveThread(socket, device);
+                    receiveThread = new ReceiveThread(readerClass, socket, device);
                     if(deviceCallback !=null) {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
@@ -515,17 +522,6 @@ public class Bluetooth {
         private BluetoothSocket socket;
         private BluetoothDevice device;
         private OutputStream out;
-
-        public ReceiveThread(BluetoothSocket socket, BluetoothDevice device) {
-            this.socket = socket;
-            this.device = device;
-            try {
-                out = socket.getOutputStream();
-                this.reader = new LineReader(socket.getInputStream());
-            } catch (IOException e) {
-                Log.w(getClass().getSimpleName(), e.getMessage());
-            }
-        }
 
         public ReceiveThread(Class<?> readerClass, BluetoothSocket socket, BluetoothDevice device) {
             this.socket = socket;

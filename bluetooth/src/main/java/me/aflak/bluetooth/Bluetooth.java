@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -315,18 +316,13 @@ public class Bluetooth {
     }
 
     /**
-     * Send string message to the connected device.
-     * @param msg String message.
-     * @param charset Charset used to encode the String. Default charset is UTF-8.
+     * Send byte array to the connected device.
+     * @param data byte array to be sent.
      */
-    public void send(String msg, String charset){
+    public void send(byte[] data){
         OutputStream out = receiveThread.getOutputStream();
         try {
-            if(charset==null){
-                out.write(msg.getBytes());
-            } else{
-                out.write(msg.getBytes(charset));
-            }
+            out.write(data);
         } catch (final IOException e) {
             connected = false;
             if(deviceCallback !=null){
@@ -337,6 +333,19 @@ public class Bluetooth {
                     }
                 });
             }
+        }
+    }
+
+    /**
+     * Send string message to the connected device.
+     * @param msg String message.
+     * @param charset Charset used to encode the String. Default charset is UTF-8.
+     */
+    public void send(String msg, Charset charset){
+        if(charset==null){
+            send(msg.getBytes());
+        } else{
+            send(msg.getBytes(charset));
         }
     }
 

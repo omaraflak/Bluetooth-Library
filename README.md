@@ -199,6 +199,30 @@ public class LineReader extends SocketReader{
 }
 ```
 
+If you want to use a custom delimiter, you can do :
+
+```java
+public class DelimiterReader extends SocketReader {
+    private Scanner scanner;
+
+    public DelimiterReader(InputStream inputStream) {
+        super(inputStream);
+        scanner = new Scanner(inputStream);
+        scanner.useDelimiter("\0"); // set your delimiter here
+    }
+
+    @Override
+    public byte[] read() throws IOException {
+        IOException e = scanner.ioException();
+        if(e != null){
+            throw e;
+        }
+        return scanner.next().getBytes();
+    }
+}
+
+```
+
 Then you can use your reader :
 
 ```java

@@ -9,7 +9,7 @@ This is an Android library that simplifies the process of bluetooth communicatio
 Add to your gradle dependencies:
 
 ```
-implementation 'me.aflak.libraries:bluetooth:1.3.7'
+implementation 'me.aflak.libraries:bluetooth:1.3.8'
 ```
 
 ## Enable bluetooth

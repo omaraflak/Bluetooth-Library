@@ -205,24 +205,30 @@ If you want to use a custom delimiter, you can do :
 
 ```java
 public class DelimiterReader extends SocketReader {
-    private Scanner scanner;
+    private BufferedReader reader;
+    private char delimiter;
 
     public DelimiterReader(InputStream inputStream) {
         super(inputStream);
-        scanner = new Scanner(inputStream);
-        scanner.useDelimiter("\0"); // set your delimiter here
+        reader = new BufferedReader(new InputStreamReader(inputStream));
+        delimiter = 0x0;
     }
 
     @Override
     public byte[] read() throws IOException {
-        IOException e = scanner.ioException();
-        if(e != null){
-            throw e;
+        StringBuilder sb = new StringBuilder();
+        int ch;
+        while ((ch = reader.read()) != -1) {
+            if(ch == delimiter) {
+                String message = sb.toString();
+                return message.getBytes();
+            } else {
+                sb.append(ch);
+            }
         }
-        return scanner.next().getBytes();
+        return null;
     }
 }
-
 ```
 
 Then you can use your reader :

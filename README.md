@@ -3,6 +3,7 @@
 <img src="Logotype primary.png" width="60%" height="60%" />
 
 This is an Android library that simplifies the process of bluetooth communication, **client side**.
+
 This library **does not** support **BLE** devices;
 
 # Install

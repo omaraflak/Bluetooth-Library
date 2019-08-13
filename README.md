@@ -223,7 +223,7 @@ public class DelimiterReader extends SocketReader {
                 String message = sb.toString();
                 return message.getBytes();
             } else {
-                sb.append(ch);
+                sb.append((char) ch);
             }
         }
         return null;

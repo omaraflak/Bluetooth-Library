@@ -182,7 +182,8 @@ bluetooth.send(new byte[]{61, 62, 63});
 ## Receive messages
 
 The default behavior of the library is the read from the input stream until it hits a new line, it will then propagate the message through listeners as a byte array.
-You can change the way the library reads from the socket by creating your own reader class. It must extend from `SocketReader`.
+You can change the way the library reads from the socket by creating your own reader class. It must extend from `SocketReader` and you should override the `byte[] read() throws IOException` method. **This method must block. It should not return if no values were received.**
+
 The default behavior is actually one example of implementation :
 
 ```java
@@ -197,6 +198,45 @@ public class LineReader extends SocketReader{
     @Override
     public byte[] read() throws IOException {
         return reader.readLine().getBytes();
+    }
+}
+```
+
+This is an implementation for a custom delimiter :
+
+```java
+public class DelimiterReader extends SocketReader {
+    private PushbackInputStream reader;
+    private byte delimiter;
+
+    public DelimiterReader(InputStream inputStream) {
+        super(inputStream);
+        reader = new PushbackInputStream(inputStream);
+        delimiter = 0;
+    }
+
+    @Override
+    public byte[] read() throws IOException {
+        List<Byte> byteList = new ArrayList<>();
+        byte[] tmp = new byte[1];
+
+        while(true) {
+            int n = reader.read();
+            reader.unread(n);
+
+            int count = reader.read(tmp);
+            if(count > 0) {
+                if(tmp[0] == delimiter){
+                    byte[] returnBytes = new byte[byteList.size()];
+                    for(int i=0 ; i<byteList.size() ; i++){
+                        returnBytes[i] = byteList.get(i);
+                    }
+                    return returnBytes;
+                } else {
+                    byteList.add(tmp[0]);
+                }
+            }
+        }
     }
 }
 ```

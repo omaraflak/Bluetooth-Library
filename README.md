@@ -221,6 +221,7 @@ public class DelimiterReader extends SocketReader {
         while ((ch = reader.read()) != -1) {
             if(ch == delimiter) {
                 String message = sb.toString();
+                sb.setLength(0);
                 return message.getBytes();
             } else {
                 sb.append(ch);

@@ -14,6 +14,7 @@ public abstract class SocketReader {
      * Will be called continuously to read from the socket.
      * Must be a blocking call.
      * @return byte array of data, or null if any error.
+     * @throws IOException if anything happens...
      */
     public byte[] read() throws IOException {
         return null;

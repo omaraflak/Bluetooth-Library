@@ -50,6 +50,7 @@ public class Bluetooth {
 
     private ReceiveThread receiveThread;
     private boolean connected, runOnUi;
+    private String pin;
 
     private Class readerClass;
 
@@ -394,10 +395,15 @@ public class Bluetooth {
      * @param pin String pin used for pairing.
      */
     public void pair(BluetoothDevice device, String pin){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+
         if(pin != null) {
-            device.setPin(pin.getBytes());
+            this.pin = pin;
+            filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
         }
-        context.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+
+        context.registerReceiver(pairReceiver, filter);
         try {
             Method method = device.getClass().getMethod("createBond", (Class[]) null);
             method.invoke(device, (Object[]) null);
@@ -646,11 +652,11 @@ public class Bluetooth {
             if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
                 final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 final int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
-                final int prevState	= intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
+                final int prevState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
 
                 if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING) {
                     context.unregisterReceiver(pairReceiver);
-                    if(discoveryCallback!=null){
+                    if (discoveryCallback != null) {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
@@ -658,13 +664,29 @@ public class Bluetooth {
                             }
                         });
                     }
-                } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED){
+                } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED) {
                     context.unregisterReceiver(pairReceiver);
-                    if(discoveryCallback!=null){
+                    if (discoveryCallback != null) {
                         ThreadHelper.run(runOnUi, activity, new Runnable() {
                             @Override
                             public void run() {
                                 discoveryCallback.onDeviceUnpaired(device);
+                            }
+                        });
+                    }
+                }
+            }
+            else if(BluetoothDevice.ACTION_PAIRING_REQUEST.equals(action)){
+                final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                device.setPin(pin.getBytes());
+                try {
+                    device.getClass().getMethod("setPairingConfirmation", boolean.class).invoke(device, true);
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    if (discoveryCallback != null) {
+                        ThreadHelper.run(runOnUi, activity, new Runnable() {
+                            @Override
+                            public void run() {
+                                discoveryCallback.onError(-1);
                             }
                         });
                     }

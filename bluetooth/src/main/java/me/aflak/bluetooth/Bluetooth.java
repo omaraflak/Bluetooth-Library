@@ -391,8 +391,12 @@ public class Bluetooth {
     /**
      * Pair with a specific bluetooth device.
      * @param device Bluetooth device.
+     * @param pin String pin used for pairing.
      */
-    public void pair(BluetoothDevice device){
+    public void pair(BluetoothDevice device, String pin){
+        if(pin != null) {
+            device.setPin(pin.getBytes());
+        }
         context.registerReceiver(pairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
         try {
             Method method = device.getClass().getMethod("createBond", (Class[]) null);
@@ -408,6 +412,14 @@ public class Bluetooth {
                 });
             }
         }
+    }
+
+    /**
+     * Pair with a specific bluetooth device.
+     * @param device Bluetooth device.
+     */
+    public void pair(BluetoothDevice device){
+        pair(device, null);
     }
 
     /**

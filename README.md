@@ -11,7 +11,7 @@ This library **does not** support **BLE** devices;
 Add to your gradle dependencies:
 
 ```
-implementation 'me.aflak.libraries:bluetooth:1.3.8'
+implementation 'me.aflak.libraries:bluetooth:1.3.9'
 ```
 
 ## Enable bluetooth
@@ -130,6 +130,7 @@ bluetooth.setDiscoveryCallback(new DiscoveryCallback() {
 ```java
 bluetooth.startScanning();
 bluetooth.pair(device);
+bluetooth.pair(device, "optional pin");
 ```
 
 ### Get paired devices

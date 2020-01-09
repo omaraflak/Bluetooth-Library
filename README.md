@@ -16,9 +16,9 @@ implementation 'me.aflak.libraries:bluetooth:1.3.9'
 
 ## Enable bluetooth
 
-### Asking user for bluetooth activation
-
 **Careful: You also have to enable phone location in newer versions of Android.**
+
+### Asking user for bluetooth activation
 
 ```java
 @Override

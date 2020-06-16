@@ -13,4 +13,5 @@ public interface DiscoveryCallback{
     void onDevicePaired(BluetoothDevice device);
     void onDeviceUnpaired(BluetoothDevice device);
     void onError(int errorCode);
+    void onPairingFailed(BluetoothDevice device);
 }

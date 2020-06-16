@@ -190,6 +190,11 @@ public class ScanActivity extends AppCompatActivity{
         public void onError(int errorCode) {
 
         }
+
+        @Override
+        public void onPairingFailed(BluetoothDevice device) {
+
+        }
     };
 
     private void startChatActivity(BluetoothDevice device){
